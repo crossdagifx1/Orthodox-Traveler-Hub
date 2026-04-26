@@ -3,20 +3,26 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Guzo Orthodox API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: destinations
+  - name: churches
+  - name: marketplace
+  - name: mezmurs
+  - name: news
+  - name: admin
+  - name: auth
+  - name: stats
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +30,871 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current user (or null if not logged in)
+      responses:
+        "200":
+          description: Current user or null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaybeUser"
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Simple login (email-only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+
+  /stats/overview:
+    get:
+      operationId: getStatsOverview
+      tags: [stats]
+      summary: Aggregated counts across the platform
+      responses:
+        "200":
+          description: Overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsOverview"
+
+  /destinations:
+    get:
+      operationId: listDestinations
+      tags: [destinations]
+      summary: List all spiritual destinations
+      parameters:
+        - in: query
+          name: region
+          schema: { type: string }
+        - in: query
+          name: q
+          schema: { type: string }
+      responses:
+        "200":
+          description: Destinations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Destination"
+    post:
+      operationId: createDestination
+      tags: [destinations, admin]
+      summary: Create a destination (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDestinationBody"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Destination"
+  /destinations/featured:
+    get:
+      operationId: listFeaturedDestinations
+      tags: [destinations]
+      summary: Featured / pinned destinations
+      responses:
+        "200":
+          description: Featured destinations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Destination"
+  /destinations/{id}:
+    get:
+      operationId: getDestination
+      tags: [destinations]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Destination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Destination"
+    patch:
+      operationId: updateDestination
+      tags: [destinations, admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDestinationBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Destination"
+    delete:
+      operationId: deleteDestination
+      tags: [destinations, admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+
+  /churches:
+    get:
+      operationId: listChurches
+      tags: [churches]
+      summary: List churches with map coordinates
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: country
+          schema: { type: string }
+      responses:
+        "200":
+          description: Churches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Church"
+    post:
+      operationId: createChurch
+      tags: [churches, admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChurchBody"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Church"
+  /churches/{id}:
+    get:
+      operationId: getChurch
+      tags: [churches]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Church
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Church"
+    patch:
+      operationId: updateChurch
+      tags: [churches, admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChurchBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Church"
+    delete:
+      operationId: deleteChurch
+      tags: [churches, admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+
+  /marketplace/items:
+    get:
+      operationId: listMarketplaceItems
+      tags: [marketplace]
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: Items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MarketplaceItem"
+    post:
+      operationId: createMarketplaceItem
+      tags: [marketplace]
+      summary: Create a listing (login required)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMarketplaceItemBody"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketplaceItem"
+  /marketplace/items/featured:
+    get:
+      operationId: listFeaturedItems
+      tags: [marketplace]
+      responses:
+        "200":
+          description: Featured items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MarketplaceItem"
+  /marketplace/items/{id}:
+    get:
+      operationId: getMarketplaceItem
+      tags: [marketplace]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketplaceItem"
+    patch:
+      operationId: updateMarketplaceItem
+      tags: [marketplace, admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMarketplaceItemBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketplaceItem"
+    delete:
+      operationId: deleteMarketplaceItem
+      tags: [marketplace, admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+
+  /mezmurs:
+    get:
+      operationId: listMezmurs
+      tags: [mezmurs]
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: Mezmurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mezmur"
+    post:
+      operationId: createMezmur
+      tags: [mezmurs, admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMezmurBody"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mezmur"
+  /mezmurs/trending:
+    get:
+      operationId: listTrendingMezmurs
+      tags: [mezmurs]
+      responses:
+        "200":
+          description: Trending mezmurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mezmur"
+  /mezmurs/{id}:
+    get:
+      operationId: getMezmur
+      tags: [mezmurs]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Mezmur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mezmur"
+    patch:
+      operationId: updateMezmur
+      tags: [mezmurs, admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMezmurBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mezmur"
+    delete:
+      operationId: deleteMezmur
+      tags: [mezmurs, admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+  /mezmurs/{id}/play:
+    post:
+      operationId: incrementMezmurPlays
+      tags: [mezmurs]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mezmur"
+
+  /news:
+    get:
+      operationId: listNews
+      tags: [news]
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: News posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NewsPost"
+    post:
+      operationId: createNewsPost
+      tags: [news, admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNewsBody"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsPost"
+  /news/latest:
+    get:
+      operationId: listLatestNews
+      tags: [news]
+      responses:
+        "200":
+          description: Latest news
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NewsPost"
+  /news/{id}:
+    get:
+      operationId: getNewsPost
+      tags: [news]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: News post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsPost"
+    patch:
+      operationId: updateNewsPost
+      tags: [news, admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNewsBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsPost"
+    delete:
+      operationId: deleteNewsPost
+      tags: [news, admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+
 components:
   schemas:
     HealthStatus:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+      required: [status]
 
+    OkResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+      required: [ok]
+
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string }
+        name: { type: string }
+        role: { type: string, enum: [user, admin, superadmin] }
+      required: [id, email, name, role]
+
+    MaybeUser:
+      type: object
+      properties:
+        user:
+          oneOf:
+            - $ref: "#/components/schemas/User"
+            - type: "null"
+      required: [user]
+
+    LoginBody:
+      type: object
+      properties:
+        email: { type: string }
+        name: { type: string }
+      required: [email]
+
+    StatsOverview:
+      type: object
+      properties:
+        destinations: { type: integer }
+        churches: { type: integer }
+        marketplaceItems: { type: integer }
+        mezmurs: { type: integer }
+        newsPosts: { type: integer }
+        countries: { type: integer }
+      required: [destinations, churches, marketplaceItems, mezmurs, newsPosts, countries]
+
+    Destination:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        region: { type: string }
+        country: { type: string }
+        shortDescription: { type: string }
+        description: { type: string }
+        imageUrl: { type: string }
+        gallery:
+          type: array
+          items: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        bestSeason: { type: string }
+        feastDay: { type: string }
+        founded: { type: string }
+        isFeatured: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, region, country, shortDescription, description, imageUrl, gallery, latitude, longitude, bestSeason, feastDay, founded, isFeatured, createdAt]
+
+    CreateDestinationBody:
+      type: object
+      properties:
+        name: { type: string }
+        region: { type: string }
+        country: { type: string }
+        shortDescription: { type: string }
+        description: { type: string }
+        imageUrl: { type: string }
+        gallery:
+          type: array
+          items: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        bestSeason: { type: string }
+        feastDay: { type: string }
+        founded: { type: string }
+        isFeatured: { type: boolean }
+      required: [name, region, country, shortDescription, description, imageUrl, latitude, longitude]
+
+    UpdateDestinationBody:
+      type: object
+      properties:
+        name: { type: string }
+        region: { type: string }
+        country: { type: string }
+        shortDescription: { type: string }
+        description: { type: string }
+        imageUrl: { type: string }
+        gallery:
+          type: array
+          items: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        bestSeason: { type: string }
+        feastDay: { type: string }
+        founded: { type: string }
+        isFeatured: { type: boolean }
+
+    Church:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        city: { type: string }
+        country: { type: string }
+        address: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        phone: { type: string }
+        website: { type: string }
+        priest: { type: string }
+        liturgyTimes: { type: string }
+        imageUrl: { type: string }
+        description: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, city, country, address, latitude, longitude, phone, website, priest, liturgyTimes, imageUrl, description, createdAt]
+
+    CreateChurchBody:
+      type: object
+      properties:
+        name: { type: string }
+        city: { type: string }
+        country: { type: string }
+        address: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        phone: { type: string }
+        website: { type: string }
+        priest: { type: string }
+        liturgyTimes: { type: string }
+        imageUrl: { type: string }
+        description: { type: string }
+      required: [name, city, country, address, latitude, longitude, imageUrl, description]
+
+    UpdateChurchBody:
+      type: object
+      properties:
+        name: { type: string }
+        city: { type: string }
+        country: { type: string }
+        address: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        phone: { type: string }
+        website: { type: string }
+        priest: { type: string }
+        liturgyTimes: { type: string }
+        imageUrl: { type: string }
+        description: { type: string }
+
+    MarketplaceItem:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        category: { type: string }
+        price: { type: number }
+        currency: { type: string }
+        description: { type: string }
+        imageUrl: { type: string }
+        sellerName: { type: string }
+        sellerLocation: { type: string }
+        condition: { type: string }
+        inStock: { type: boolean }
+        isFeatured: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required: [id, title, category, price, currency, description, imageUrl, sellerName, sellerLocation, condition, inStock, isFeatured, createdAt]
+
+    CreateMarketplaceItemBody:
+      type: object
+      properties:
+        title: { type: string }
+        category: { type: string }
+        price: { type: number }
+        currency: { type: string }
+        description: { type: string }
+        imageUrl: { type: string }
+        sellerName: { type: string }
+        sellerLocation: { type: string }
+        condition: { type: string }
+        inStock: { type: boolean }
+        isFeatured: { type: boolean }
+      required: [title, category, price, description, imageUrl, sellerName]
+
+    UpdateMarketplaceItemBody:
+      type: object
+      properties:
+        title: { type: string }
+        category: { type: string }
+        price: { type: number }
+        currency: { type: string }
+        description: { type: string }
+        imageUrl: { type: string }
+        sellerName: { type: string }
+        sellerLocation: { type: string }
+        condition: { type: string }
+        inStock: { type: boolean }
+        isFeatured: { type: boolean }
+
+    Mezmur:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        artist: { type: string }
+        category: { type: string }
+        language: { type: string }
+        duration: { type: integer }
+        coverUrl: { type: string }
+        audioUrl: { type: string }
+        lyrics: { type: string }
+        plays: { type: integer }
+        isTrending: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required: [id, title, artist, category, language, duration, coverUrl, audioUrl, lyrics, plays, isTrending, createdAt]
+
+    CreateMezmurBody:
+      type: object
+      properties:
+        title: { type: string }
+        artist: { type: string }
+        category: { type: string }
+        language: { type: string }
+        duration: { type: integer }
+        coverUrl: { type: string }
+        audioUrl: { type: string }
+        lyrics: { type: string }
+        isTrending: { type: boolean }
+      required: [title, artist, category, language, duration, coverUrl, audioUrl]
+
+    UpdateMezmurBody:
+      type: object
+      properties:
+        title: { type: string }
+        artist: { type: string }
+        category: { type: string }
+        language: { type: string }
+        duration: { type: integer }
+        coverUrl: { type: string }
+        audioUrl: { type: string }
+        lyrics: { type: string }
+        isTrending: { type: boolean }
+
+    NewsPost:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        slug: { type: string }
+        excerpt: { type: string }
+        content: { type: string }
+        category: { type: string }
+        author: { type: string }
+        coverUrl: { type: string }
+        readMinutes: { type: integer }
+        publishedAt: { type: string, format: date-time }
+      required: [id, title, slug, excerpt, content, category, author, coverUrl, readMinutes, publishedAt]
+
+    CreateNewsBody:
+      type: object
+      properties:
+        title: { type: string }
+        excerpt: { type: string }
+        content: { type: string }
+        category: { type: string }
+        author: { type: string }
+        coverUrl: { type: string }
+        readMinutes: { type: integer }
+      required: [title, excerpt, content, category, author, coverUrl]
+
+    UpdateNewsBody:
+      type: object
+      properties:
+        title: { type: string }
+        excerpt: { type: string }
+        content: { type: string }
+        category: { type: string }
+        author: { type: string }
+        coverUrl: { type: string }
+        readMinutes: { type: integer }

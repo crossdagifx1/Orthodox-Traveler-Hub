@@ -1,0 +1,38 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "K2w75DMUL_W_AZcsE5rAT"
+uri = "file://artifacts/guzo/public/images/hero-bg.png"
+type = "image"
+title = "Orthodox cross glowing in church"
+
+[[generated]]
+id = "hFbszdXwv5Zqlq1IbX9aN"
+uri = "file://artifacts/guzo/public/images/empty-incense.png"
+type = "image"
+title = "Empty state incense burner"
+
+[[generated]]
+id = "rs62td26Q17qeOIb2T3Nf"
+uri = "file://artifacts/guzo/public/images/login-art.png"
+type = "image"
+title = "Login screen hymnal"
+
+[[generated]]
+id = "Ga_GTkw45JdVwVTEt-JUX"
+uri = "file://artifacts/guzo/public/images/lalibela.png"
+type = "image"
+title = "Holy destination Lalibela"
+
+[[generated]]
+id = "VEoVEWuSqvk6LbLdPsIzF"
+uri = "file://artifacts/guzo/public/images/market-bg.png"
+type = "image"
+title = "Marketplace background"
+
+[[generated]]
+id = "cCXF07XpM2yJHYMrbXPRK"
+uri = "file://artifacts/guzo/public/images/empty-scroll.png"
+type = "image"
+title = "Empty list icon"

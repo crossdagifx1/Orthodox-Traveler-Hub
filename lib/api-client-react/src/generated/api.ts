@@ -30,6 +30,7 @@ import type {
   ListMarketplaceItemsParams,
   ListMezmursParams,
   ListNewsParams,
+  Login401,
   LoginBody,
   MarketplaceItem,
   MaybeUser,
@@ -205,7 +206,7 @@ export function useGetCurrentUser<
 }
 
 /**
- * @summary Simple login (email-only)
+ * @summary Sign in or sign up with email + password
  */
 export const getLoginUrl = () => {
   return `/api/auth/login`;
@@ -224,7 +225,7 @@ export const login = async (
 };
 
 export const getLoginMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<Login401>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -265,13 +266,13 @@ export type LoginMutationResult = NonNullable<
   Awaited<ReturnType<typeof login>>
 >;
 export type LoginMutationBody = BodyType<LoginBody>;
-export type LoginMutationError = ErrorType<unknown>;
+export type LoginMutationError = ErrorType<Login401>;
 
 /**
- * @summary Simple login (email-only)
+ * @summary Sign in or sign up with email + password
  */
 export const useLogin = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<Login401>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<

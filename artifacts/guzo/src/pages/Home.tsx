@@ -1,71 +1,194 @@
-import { useGetStatsOverview, useListFeaturedDestinations, useListTrendingMezmurs } from "@workspace/api-client-react";
+import {
+  useGetStatsOverview,
+  useListFeaturedDestinations,
+  useListTrendingMezmurs,
+  useListLatestNews,
+  useListFeaturedItems,
+} from "@workspace/api-client-react";
 import { Link } from "wouter";
-import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
+import { MapPin, ArrowRight, Sparkles, Music, Newspaper, ShoppingBag, Map as MapIcon, Flame, Cross } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { useEthiopianCalendar } from "@/providers/EthiopianCalendarProvider";
+import { useSettings } from "@/providers/SettingsProvider";
 
 export function Home() {
+  const { t, i18n } = useTranslation();
+  const { ethiopian, fastingKey, saint } = useEthiopianCalendar();
+  const { calendar, isAmharic } = useSettings();
+
   const { data: stats } = useGetStatsOverview();
   const { data: featuredDestinations } = useListFeaturedDestinations();
   const { data: trendingMezmurs } = useListTrendingMezmurs();
+  const { data: latestNews } = useListLatestNews();
+  const { data: featuredItems } = useListFeaturedItems();
+
+  const verses = useMemo(() => {
+    const arr = i18n.t("verses", { returnObjects: true }) as Array<{ ref: string; text: string }>;
+    return Array.isArray(arr) ? arr : [];
+  }, [i18n.language, i18n]);
+
+  const verse = useMemo(() => {
+    if (verses.length === 0) return null;
+    const dayIndex = Math.floor(Date.now() / 86400000) % verses.length;
+    return verses[dayIndex];
+  }, [verses]);
+
+  const ethiopianMonthName =
+    t(`calendar.months.${ethiopian.month}`, { defaultValue: ethiopian.monthName });
+  const todayLabel =
+    calendar === "ethiopian"
+      ? `${ethiopian.day} ${ethiopianMonthName} ${ethiopian.year}`
+      : new Date().toLocaleDateString(isAmharic ? "am-ET" : "en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+  const fastLabel = t(`calendar.fastingPeriod.${fastingKey}`);
 
   return (
-    <div className="pb-8">
-      {/* Hero Section */}
-      <section className="relative w-full aspect-[4/5] max-h-[600px] flex items-end p-6">
-        <img src="/images/hero-bg.png" alt="Hero" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        
+    <div className="pb-10">
+      {/* Hero */}
+      <section className="relative w-full aspect-[4/5] max-h-[620px] flex items-end p-6">
+        <img
+          src="/images/hero-bg.png"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/65 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent" />
+
         <div className="relative z-10 w-full">
-          <h1 className="text-4xl font-serif font-bold text-foreground mb-2">Welcome to Guzo</h1>
-          <p className="text-muted-foreground text-lg mb-6">Discover the ancient path of Ethiopian Orthodox Christianity.</p>
-          <div className="flex gap-4">
+          <div className="inline-flex items-center gap-1.5 mb-3 text-[10px] font-bold uppercase tracking-[0.3em] text-primary-foreground/90 bg-primary/85 backdrop-blur px-3 py-1 rounded-full">
+            <Cross className="h-3 w-3" />
+            <span>{t("app.tagline")}</span>
+          </div>
+          <h1 className="text-4xl md:text-[2.6rem] font-serif font-bold text-foreground mb-3 leading-tight drop-shadow">
+            {t("app.welcome")}
+          </h1>
+          <p className="text-muted-foreground text-base mb-6 max-w-[28ch]">
+            {t("app.description")}
+          </p>
+          <div className="flex gap-3">
             <Link href="/destinations">
-              <span className="bg-primary text-primary-foreground px-6 py-3 rounded-full font-medium text-sm flex items-center gap-2 hover-elevate cursor-pointer">
-                Start Journey <ArrowRight className="h-4 w-4" />
+              <span
+                className="bg-primary text-primary-foreground px-6 py-3 rounded-full font-medium text-sm flex items-center gap-2 hover-elevate active-elevate-2 cursor-pointer shadow-lg"
+                data-testid="link-start-journey"
+              >
+                {t("home.startJourney")} <ArrowRight className="h-4 w-4" />
+              </span>
+            </Link>
+            <Link href="/map">
+              <span className="bg-background/70 backdrop-blur border border-border text-foreground px-5 py-3 rounded-full font-medium text-sm flex items-center gap-2 hover-elevate active-elevate-2 cursor-pointer">
+                <MapIcon className="h-4 w-4" /> {t("nav.map")}
               </span>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="px-4 -mt-4 relative z-20">
-        <div className="bg-card rounded-2xl shadow-lg border border-border p-4 grid grid-cols-3 gap-4 text-center divide-x divide-border">
-          <div>
-            <div className="text-2xl font-bold font-serif text-primary">{stats?.destinations || 0}</div>
-            <div className="text-xs text-muted-foreground mt-1">Holy Sites</div>
+      {/* Stats card */}
+      <section className="px-4 -mt-6 relative z-20">
+        <div className="bg-card rounded-2xl shadow-xl border border-border/60 p-4 grid grid-cols-3 gap-2 text-center divide-x divide-border/60">
+          <Stat value={stats?.destinations} label={t("home.stats.holySites")} testId="stat-destinations" />
+          <Stat value={stats?.churches} label={t("home.stats.churches")} testId="stat-churches" />
+          <Stat value={stats?.mezmurs} label={t("home.stats.mezmurs")} testId="stat-mezmurs" />
+        </div>
+      </section>
+
+      {/* Today in Church */}
+      <section className="px-4 mt-8">
+        <SectionHeader
+          icon={<Sparkles className="h-4 w-4" />}
+          title={t("home.sections.today")}
+          subtitle={t("home.sections.todaySubtitle")}
+        />
+        <div className="rounded-2xl bg-gradient-to-br from-primary/12 via-card to-secondary/10 border border-primary/20 p-5 shadow-sm" data-testid="card-today">
+          <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-primary font-bold mb-2">
+            <span>{t("calendar.today")}</span>
+            <span>{todayLabel}</span>
           </div>
-          <div>
-            <div className="text-2xl font-bold font-serif text-primary">{stats?.churches || 0}</div>
-            <div className="text-xs text-muted-foreground mt-1">Churches</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold font-serif text-primary">{stats?.mezmurs || 0}</div>
-            <div className="text-xs text-muted-foreground mt-1">Mezmurs</div>
+          <h3 className="font-serif text-2xl font-bold text-foreground leading-tight mb-1">
+            {saint.name}
+          </h3>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+            {saint.description}
+          </p>
+          <div className="flex items-center gap-2 text-xs">
+            <span
+              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-semibold ${
+                fastingKey === "none"
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-secondary/15 text-secondary"
+              }`}
+              data-testid="badge-fasting"
+            >
+              <Flame className="h-3 w-3" />
+              {fastLabel}
+            </span>
           </div>
         </div>
       </section>
 
-      {/* Featured Destinations */}
+      {/* Daily Verse */}
+      {verse && (
+        <section className="px-4 mt-8">
+          <SectionHeader
+            icon={<Cross className="h-4 w-4" />}
+            title={t("home.sections.verse")}
+          />
+          <blockquote
+            className="rounded-2xl bg-card border border-border/60 px-5 py-6 relative shadow-sm"
+            data-testid="card-verse"
+          >
+            <span className="absolute top-1 left-3 text-6xl font-serif text-primary/15 leading-none select-none">
+              “
+            </span>
+            <p className="font-serif text-lg leading-relaxed text-foreground italic relative">
+              {verse.text}
+            </p>
+            <footer className="text-xs uppercase tracking-widest text-primary font-bold mt-3">
+              — {verse.ref}
+            </footer>
+          </blockquote>
+        </section>
+      )}
+
+      {/* Featured destinations */}
       <section className="mt-10 pl-4">
-        <div className="flex items-center justify-between pr-4 mb-4">
-          <h2 className="text-xl font-serif font-bold text-foreground">Featured Destinations</h2>
+        <div className="flex items-end justify-between pr-4 mb-3">
+          <div>
+            <SectionHeader
+              icon={<MapPin className="h-4 w-4" />}
+              title={t("home.sections.featured")}
+            />
+          </div>
           <Link href="/destinations">
-            <span className="text-sm font-medium text-primary flex items-center gap-1 cursor-pointer">
-              View all <ArrowRight className="h-3 w-3" />
+            <span className="text-xs font-semibold text-primary flex items-center gap-1 cursor-pointer hover-elevate px-2 py-1 rounded-md">
+              {t("nav.viewAll")} <ArrowRight className="h-3 w-3" />
             </span>
           </Link>
         </div>
         <div className="flex gap-4 overflow-x-auto pb-4 snap-x pr-4 -mr-4 scrollbar-hide">
-          {featuredDestinations?.map((dest) => (
+          {(featuredDestinations ?? []).map((dest) => (
             <Link key={dest.id} href={`/destinations/${dest.id}`}>
-              <Card className="w-[280px] shrink-0 snap-start rounded-2xl overflow-hidden cursor-pointer hover-elevate transition-transform active:scale-95 group border-0 shadow-md">
+              <Card
+                className="w-[280px] shrink-0 snap-start rounded-2xl overflow-hidden cursor-pointer hover-elevate transition-transform active:scale-95 group border-0 shadow-md"
+                data-testid={`card-featured-destination-${dest.id}`}
+              >
                 <div className="aspect-[4/3] relative">
-                  <img src={dest.imageUrl || "https://placehold.co/400x300"} alt={dest.name} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-4">
-                    <h3 className="text-white font-bold text-lg leading-tight mb-1">{dest.name}</h3>
-                    <div className="flex items-center text-white/80 text-xs font-medium">
+                  <img
+                    src={dest.imageUrl || "https://placehold.co/400x300"}
+                    alt={dest.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 p-4 right-0">
+                    <h3 className="text-white font-bold text-lg leading-tight mb-1 line-clamp-2">
+                      {dest.name}
+                    </h3>
+                    <div className="flex items-center text-white/90 text-xs font-medium">
                       <MapPin className="h-3 w-3 mr-1" /> {dest.region}, {dest.country}
                     </div>
                   </div>
@@ -75,6 +198,172 @@ export function Home() {
           ))}
         </div>
       </section>
+
+      {/* Trending mezmurs */}
+      <section className="mt-8 px-4">
+        <div className="flex items-end justify-between mb-3">
+          <SectionHeader
+            icon={<Music className="h-4 w-4" />}
+            title={t("home.sections.trendingMezmurs")}
+          />
+          <Link href="/mezmurs">
+            <span className="text-xs font-semibold text-primary flex items-center gap-1 cursor-pointer hover-elevate px-2 py-1 rounded-md">
+              {t("nav.viewAll")} <ArrowRight className="h-3 w-3" />
+            </span>
+          </Link>
+        </div>
+        <div className="space-y-2">
+          {(trendingMezmurs ?? []).slice(0, 4).map((m, i) => (
+            <Link key={m.id} href={`/mezmurs/${m.id}`}>
+              <div
+                className="flex items-center gap-3 bg-card rounded-2xl p-2.5 border border-border/60 hover-elevate cursor-pointer"
+                data-testid={`row-mezmur-${m.id}`}
+              >
+                <div className="text-xs font-mono w-5 text-center text-muted-foreground font-bold">
+                  {i + 1}
+                </div>
+                <div className="w-12 h-12 rounded-xl overflow-hidden bg-muted shrink-0">
+                  <img
+                    src={m.coverUrl || "https://placehold.co/120"}
+                    alt={m.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-foreground text-sm truncate">{m.title}</div>
+                  <div className="text-xs text-muted-foreground truncate">{m.artist}</div>
+                </div>
+                <div className="text-[10px] text-muted-foreground tabular-nums shrink-0">
+                  {t("mezmurs.playCount", { count: m.plays ?? 0 })}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Featured marketplace items */}
+      {(featuredItems?.length ?? 0) > 0 && (
+        <section className="mt-8 pl-4">
+          <div className="flex items-end justify-between pr-4 mb-3">
+            <SectionHeader
+              icon={<ShoppingBag className="h-4 w-4" />}
+              title={t("home.sections.exploreMarket")}
+            />
+            <Link href="/marketplace">
+              <span className="text-xs font-semibold text-primary flex items-center gap-1 cursor-pointer hover-elevate px-2 py-1 rounded-md">
+                {t("nav.viewAll")} <ArrowRight className="h-3 w-3" />
+              </span>
+            </Link>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-4 pr-4 -mr-4 scrollbar-hide">
+            {(featuredItems ?? []).slice(0, 6).map((item) => (
+              <Link key={item.id} href={`/marketplace/${item.id}`}>
+                <Card
+                  className="w-[160px] shrink-0 rounded-2xl overflow-hidden cursor-pointer hover-elevate group border border-border/60 shadow-sm"
+                  data-testid={`card-featured-item-${item.id}`}
+                >
+                  <div className="aspect-square bg-muted/60 overflow-hidden">
+                    <img
+                      src={item.imageUrl || "https://placehold.co/300"}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-2.5">
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">
+                      {item.category}
+                    </div>
+                    <div className="text-sm font-medium text-foreground line-clamp-2 leading-tight mb-1">
+                      {item.title}
+                    </div>
+                    <div className="text-sm font-bold text-primary">
+                      {item.price} <span className="text-[10px] text-muted-foreground">{item.currency}</span>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Latest news */}
+      <section className="mt-8 px-4">
+        <div className="flex items-end justify-between mb-3">
+          <SectionHeader
+            icon={<Newspaper className="h-4 w-4" />}
+            title={t("home.sections.latestNews")}
+          />
+          <Link href="/news">
+            <span className="text-xs font-semibold text-primary flex items-center gap-1 cursor-pointer hover-elevate px-2 py-1 rounded-md">
+              {t("nav.viewAll")} <ArrowRight className="h-3 w-3" />
+            </span>
+          </Link>
+        </div>
+        <div className="space-y-3">
+          {(latestNews ?? []).slice(0, 3).map((post) => (
+            <Link key={post.id} href={`/news/${post.id}`}>
+              <article
+                className="flex gap-3 bg-card rounded-2xl p-3 border border-border/60 hover-elevate cursor-pointer"
+                data-testid={`row-news-${post.id}`}
+              >
+                <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted shrink-0">
+                  <img
+                    src={post.coverUrl || "https://placehold.co/200"}
+                    alt={post.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] uppercase tracking-widest text-secondary font-bold mb-1">
+                    {post.category}
+                  </div>
+                  <h3 className="font-serif font-bold text-foreground leading-tight line-clamp-2 mb-1">
+                    {post.title}
+                  </h3>
+                  <div className="text-[10px] text-muted-foreground">
+                    {t("common.minRead", { count: post.readMinutes ?? 3 })}
+                  </div>
+                </div>
+              </article>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function Stat({ value, label, testId }: { value?: number; label: string; testId?: string }) {
+  return (
+    <div data-testid={testId}>
+      <div className="text-2xl font-bold font-serif text-primary tabular-nums">{value ?? 0}</div>
+      <div className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider font-medium">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({
+  icon,
+  title,
+  subtitle,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+}) {
+  return (
+    <div className="mb-3">
+      <div className="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-[0.25em]">
+        {icon}
+        <span>{title}</span>
+      </div>
+      {subtitle && (
+        <div className="text-xs text-muted-foreground mt-1">{subtitle}</div>
+      )}
     </div>
   );
 }

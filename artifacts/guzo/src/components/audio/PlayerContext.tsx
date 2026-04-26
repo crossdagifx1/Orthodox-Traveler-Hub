@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from "react";
-import { Mezmur } from "@workspace/api-client-react";
+import { createContext, useContext, useState, type ReactNode } from "react";
+import type { Mezmur } from "@workspace/api-client-react";
 
 interface PlayerContextType {
   currentTrack: Mezmur | null;
@@ -7,6 +7,7 @@ interface PlayerContextType {
   playTrack: (track: Mezmur) => void;
   pauseTrack: () => void;
   resumeTrack: () => void;
+  togglePlayPause: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -22,9 +23,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const pauseTrack = () => setIsPlaying(false);
   const resumeTrack = () => setIsPlaying(true);
+  const togglePlayPause = () => setIsPlaying((p) => !p);
 
   return (
-    <PlayerContext.Provider value={{ currentTrack, isPlaying, playTrack, pauseTrack, resumeTrack }}>
+    <PlayerContext.Provider
+      value={{ currentTrack, isPlaying, playTrack, pauseTrack, resumeTrack, togglePlayPause }}
+    >
       {children}
     </PlayerContext.Provider>
   );

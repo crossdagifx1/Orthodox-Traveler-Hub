@@ -47,7 +47,7 @@ paths:
     post:
       operationId: login
       tags: [auth]
-      summary: Simple login (email-only)
+      summary: Sign in or sign up with email + password
       requestBody:
         required: true
         content:
@@ -61,6 +61,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+        "401":
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+                required: [error]
   /auth/logout:
     post:
       operationId: logout
@@ -641,8 +650,9 @@ components:
       type: object
       properties:
         email: { type: string }
+        password: { type: string, minLength: 6 }
         name: { type: string }
-      required: [email]
+      required: [email, password]
 
     StatsOverview:
       type: object

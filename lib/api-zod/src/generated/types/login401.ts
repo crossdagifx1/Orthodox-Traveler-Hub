@@ -6,9 +6,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface LoginBody {
-  email: string;
-  /** @minLength 6 */
-  password: string;
-  name?: string;
-}
+export type Login401 = {
+  error: string;
+};

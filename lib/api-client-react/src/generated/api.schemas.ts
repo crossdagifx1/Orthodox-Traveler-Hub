@@ -34,6 +34,8 @@ export interface MaybeUser {
 
 export interface LoginBody {
   email: string;
+  /** @minLength 6 */
+  password: string;
   name?: string;
 }
 
@@ -258,6 +260,10 @@ export interface UpdateNewsBody {
   coverUrl?: string;
   readMinutes?: number;
 }
+
+export type Login401 = {
+  error: string;
+};
 
 export type ListDestinationsParams = {
   region?: string;

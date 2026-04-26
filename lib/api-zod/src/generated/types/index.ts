@@ -19,6 +19,7 @@ export * from "./listDestinationsParams";
 export * from "./listMarketplaceItemsParams";
 export * from "./listMezmursParams";
 export * from "./listNewsParams";
+export * from "./login401";
 export * from "./loginBody";
 export * from "./marketplaceItem";
 export * from "./maybeUser";

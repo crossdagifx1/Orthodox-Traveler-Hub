@@ -30,10 +30,13 @@ export const GetCurrentUserResponse = zod.object({
 });
 
 /**
- * @summary Simple login (email-only)
+ * @summary Sign in or sign up with email + password
  */
+export const loginBodyPasswordMin = 6;
+
 export const LoginBody = zod.object({
   email: zod.string(),
+  password: zod.string().min(loginBodyPasswordMin),
   name: zod.string().optional(),
 });
 

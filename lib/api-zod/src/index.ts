@@ -1,1 +1,20 @@
 export * from "./generated/api";
+export type {
+  Church,
+  Destination,
+  HealthStatus,
+  ListChurchesParams,
+  ListDestinationsParams,
+  ListMarketplaceItemsParams,
+  ListMezmursParams,
+  ListNewsParams,
+  Login401,
+  MarketplaceItem,
+  MaybeUser,
+  Mezmur,
+  NewsPost,
+  OkResponse,
+  StatsOverview,
+  User,
+  UserRole,
+} from "./generated/types";

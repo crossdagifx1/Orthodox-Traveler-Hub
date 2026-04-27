@@ -122,7 +122,9 @@
     "searchPlaceholder": "Search churches…",
     "directions": "Get directions",
     "noChurches": "No churches found",
-    "viewDetails": "View Church"
+    "viewDetails": "View Church",
+    "churches": "churches",
+    "countries": "countries"
   },
   "church": {
     "address": "Address",
@@ -291,7 +293,36 @@
     "manageNews": "Manage news",
     "totalCount": "Total {{count}}",
     "addNew": "Add new",
-    "confirmDelete": "Delete this item?"
+    "confirmDelete": "Delete this item?",
+    "minRole": "Required role",
+    "users": {
+      "title": "User Management",
+      "subtitle": "Suspend, ban, or change roles. Audited.",
+      "total": "users",
+      "roleUpdated": "Role updated",
+      "statusUpdated": "Status updated",
+      "deleted": "User deleted",
+      "empty": "No users match the filters."
+    },
+    "audit": {
+      "title": "Audit Log",
+      "subtitle": "Append-only record of every privileged action.",
+      "entries": "entries",
+      "empty": "No audit entries yet."
+    },
+    "analytics": {
+      "title": "Analytics",
+      "subtitle": "Users, content and audit overview",
+      "users": "Users",
+      "content": "Content",
+      "audit": "Audit"
+    },
+    "settings": {
+      "title": "System Settings",
+      "subtitle": "Key-value system configuration. Super-admin only.",
+      "saved": "Saved",
+      "add": "Add new setting"
+    }
   },
   "verses": [
     {

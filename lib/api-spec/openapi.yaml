@@ -614,6 +614,123 @@ paths:
               schema:
                 $ref: "#/components/schemas/OkResponse"
 
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [admin]
+      summary: List all users (admin+)
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+        - { name: role, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 100, maximum: 500 } }
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+
+  /admin/users/{id}:
+    get:
+      operationId: adminGetUser
+      tags: [admin]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+    patch:
+      operationId: adminUpdateUser
+      tags: [admin]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminUpdateUserBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+    delete:
+      operationId: adminDeleteUser
+      tags: [admin]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /admin/audit:
+    get:
+      operationId: adminListAudit
+      tags: [admin]
+      summary: List audit log entries (admin+)
+      parameters:
+        - { name: actorId, in: query, schema: { type: integer } }
+        - { name: action, in: query, schema: { type: string } }
+        - { name: targetType, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 100, maximum: 500 } }
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AuditLogEntry" }
+
+  /admin/analytics/overview:
+    get:
+      operationId: adminAnalyticsOverview
+      tags: [admin]
+      summary: Aggregated stats for the admin console
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminAnalytics" }
+
+  /admin/system/settings:
+    get:
+      operationId: adminGetSystemSettings
+      tags: [admin]
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SystemSetting" }
+    patch:
+      operationId: adminUpdateSystemSetting
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateSystemSettingBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SystemSetting" }
+
 components:
   schemas:
     HealthStatus:
@@ -634,8 +751,15 @@ components:
         id: { type: string }
         email: { type: string }
         name: { type: string }
-        role: { type: string, enum: [user, admin, superadmin] }
-      required: [id, email, name, role]
+        role: { type: string, enum: [user, moderator, admin, superadmin] }
+        status: { type: string, enum: [active, suspended, banned] }
+        suspendedUntil:
+          oneOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+        notes: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, email, name, role, status, notes, createdAt]
 
     MaybeUser:
       type: object
@@ -908,3 +1032,86 @@ components:
         author: { type: string }
         coverUrl: { type: string }
         readMinutes: { type: integer }
+
+    AdminUpdateUserBody:
+      type: object
+      properties:
+        name: { type: string }
+        role: { type: string, enum: [user, moderator, admin, superadmin] }
+        status: { type: string, enum: [active, suspended, banned] }
+        suspendedUntil:
+          oneOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+        notes: { type: string }
+
+    AuditLogEntry:
+      type: object
+      properties:
+        id: { type: string }
+        actorId:
+          oneOf:
+            - { type: integer }
+            - { type: "null" }
+        actorEmail: { type: string }
+        actorRole: { type: string }
+        action: { type: string }
+        targetType: { type: string }
+        targetId: { type: string }
+        metadata: { type: object, additionalProperties: true }
+        ip: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, actorEmail, actorRole, action, targetType, targetId, metadata, ip, createdAt]
+
+    AdminAnalytics:
+      type: object
+      properties:
+        users:
+          type: object
+          properties:
+            total: { type: integer }
+            active: { type: integer }
+            suspended: { type: integer }
+            banned: { type: integer }
+            admins: { type: integer }
+            superadmins: { type: integer }
+            moderators: { type: integer }
+            recent: { type: integer }
+          required: [total, active, suspended, banned, admins, superadmins, moderators, recent]
+        content:
+          type: object
+          properties:
+            destinations: { type: integer }
+            churches: { type: integer }
+            marketplaceItems: { type: integer }
+            mezmurs: { type: integer }
+            newsPosts: { type: integer }
+          required: [destinations, churches, marketplaceItems, mezmurs, newsPosts]
+        audit:
+          type: object
+          properties:
+            total: { type: integer }
+            last24h: { type: integer }
+          required: [total, last24h]
+      required: [users, content, audit]
+
+    SystemSetting:
+      type: object
+      properties:
+        key: { type: string }
+        value: {}
+        description: { type: string }
+        updatedAt: { type: string, format: date-time }
+        updatedBy:
+          oneOf:
+            - { type: integer }
+            - { type: "null" }
+      required: [key, value, description, updatedAt]
+
+    UpdateSystemSettingBody:
+      type: object
+      properties:
+        key: { type: string }
+        value: {}
+        description: { type: string }
+      required: [key, value]

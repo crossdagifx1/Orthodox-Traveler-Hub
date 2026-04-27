@@ -8,6 +8,7 @@ import {
   timestamp,
   numeric,
   varchar,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
@@ -16,6 +17,9 @@ export const usersTable = pgTable("users", {
   name: varchar("name", { length: 255 }).notNull(),
   passwordHash: varchar("password_hash", { length: 255 }).notNull().default(""),
   role: varchar("role", { length: 32 }).notNull().default("user"),
+  status: varchar("status", { length: 32 }).notNull().default("active"),
+  suspendedUntil: timestamp("suspended_until", { withTimezone: true }),
+  notes: text("notes").notNull().default(""),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 export type User = typeof usersTable.$inferSelect;
@@ -103,3 +107,35 @@ export const newsPostsTable = pgTable("news_posts", {
   publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow(),
 });
 export type NewsPost = typeof newsPostsTable.$inferSelect;
+
+/**
+ * Append-only audit log of every privileged action taken by an admin /
+ * super-admin / moderator. Read-only from the UI; writes happen via the
+ * `recordAudit()` helper in api-server. metadata is freeform JSON.
+ */
+export const auditLogTable = pgTable("audit_log", {
+  id: serial("id").primaryKey(),
+  actorId: integer("actor_id"),
+  actorEmail: varchar("actor_email", { length: 255 }).notNull().default(""),
+  actorRole: varchar("actor_role", { length: 32 }).notNull().default(""),
+  action: varchar("action", { length: 64 }).notNull(),
+  targetType: varchar("target_type", { length: 64 }).notNull().default(""),
+  targetId: varchar("target_id", { length: 64 }).notNull().default(""),
+  metadata: jsonb("metadata").notNull().default({}),
+  ip: varchar("ip", { length: 64 }).notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export type AuditLog = typeof auditLogTable.$inferSelect;
+
+/**
+ * Key-value system settings, only writable by super-admins.
+ * Values are JSON for flexibility (string, number, bool, object).
+ */
+export const systemSettingsTable = pgTable("system_settings", {
+  key: varchar("key", { length: 128 }).primaryKey(),
+  value: jsonb("value").notNull().default({}),
+  description: text("description").notNull().default(""),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedBy: integer("updated_by"),
+});
+export type SystemSetting = typeof systemSettingsTable.$inferSelect;

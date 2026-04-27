@@ -23,7 +23,11 @@ export const GetCurrentUserResponse = zod.object({
       id: zod.string(),
       email: zod.string(),
       name: zod.string(),
-      role: zod.enum(["user", "admin", "superadmin"]),
+      role: zod.enum(["user", "moderator", "admin", "superadmin"]),
+      status: zod.enum(["active", "suspended", "banned"]),
+      suspendedUntil: zod.union([zod.coerce.date(), zod.null()]).optional(),
+      notes: zod.string(),
+      createdAt: zod.coerce.date(),
     }),
     zod.null(),
   ]),
@@ -44,7 +48,11 @@ export const LoginResponse = zod.object({
   id: zod.string(),
   email: zod.string(),
   name: zod.string(),
-  role: zod.enum(["user", "admin", "superadmin"]),
+  role: zod.enum(["user", "moderator", "admin", "superadmin"]),
+  status: zod.enum(["active", "suspended", "banned"]),
+  suspendedUntil: zod.union([zod.coerce.date(), zod.null()]).optional(),
+  notes: zod.string(),
+  createdAt: zod.coerce.date(),
 });
 
 /**
@@ -732,4 +740,160 @@ export const DeleteNewsPostParams = zod.object({
 
 export const DeleteNewsPostResponse = zod.object({
   ok: zod.boolean(),
+});
+
+/**
+ * @summary List all users (admin+)
+ */
+export const adminListUsersQueryLimitDefault = 100;
+export const adminListUsersQueryLimitMax = 500;
+
+export const AdminListUsersQueryParams = zod.object({
+  q: zod.coerce.string().optional(),
+  role: zod.coerce.string().optional(),
+  status: zod.coerce.string().optional(),
+  limit: zod.coerce
+    .number()
+    .max(adminListUsersQueryLimitMax)
+    .default(adminListUsersQueryLimitDefault),
+});
+
+export const AdminListUsersResponseItem = zod.object({
+  id: zod.string(),
+  email: zod.string(),
+  name: zod.string(),
+  role: zod.enum(["user", "moderator", "admin", "superadmin"]),
+  status: zod.enum(["active", "suspended", "banned"]),
+  suspendedUntil: zod.union([zod.coerce.date(), zod.null()]).optional(),
+  notes: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const AdminListUsersResponse = zod.array(AdminListUsersResponseItem);
+
+export const AdminGetUserParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminGetUserResponse = zod.object({
+  id: zod.string(),
+  email: zod.string(),
+  name: zod.string(),
+  role: zod.enum(["user", "moderator", "admin", "superadmin"]),
+  status: zod.enum(["active", "suspended", "banned"]),
+  suspendedUntil: zod.union([zod.coerce.date(), zod.null()]).optional(),
+  notes: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+
+export const AdminUpdateUserParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminUpdateUserBody = zod.object({
+  name: zod.string().optional(),
+  role: zod.enum(["user", "moderator", "admin", "superadmin"]).optional(),
+  status: zod.enum(["active", "suspended", "banned"]).optional(),
+  suspendedUntil: zod.union([zod.coerce.date(), zod.null()]).optional(),
+  notes: zod.string().optional(),
+});
+
+export const AdminUpdateUserResponse = zod.object({
+  id: zod.string(),
+  email: zod.string(),
+  name: zod.string(),
+  role: zod.enum(["user", "moderator", "admin", "superadmin"]),
+  status: zod.enum(["active", "suspended", "banned"]),
+  suspendedUntil: zod.union([zod.coerce.date(), zod.null()]).optional(),
+  notes: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+
+export const AdminDeleteUserParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminDeleteUserResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+/**
+ * @summary List audit log entries (admin+)
+ */
+export const adminListAuditQueryLimitDefault = 100;
+export const adminListAuditQueryLimitMax = 500;
+
+export const AdminListAuditQueryParams = zod.object({
+  actorId: zod.coerce.number().optional(),
+  action: zod.coerce.string().optional(),
+  targetType: zod.coerce.string().optional(),
+  limit: zod.coerce
+    .number()
+    .max(adminListAuditQueryLimitMax)
+    .default(adminListAuditQueryLimitDefault),
+});
+
+export const AdminListAuditResponseItem = zod.object({
+  id: zod.string(),
+  actorId: zod.union([zod.number(), zod.null()]).optional(),
+  actorEmail: zod.string(),
+  actorRole: zod.string(),
+  action: zod.string(),
+  targetType: zod.string(),
+  targetId: zod.string(),
+  metadata: zod.record(zod.string(), zod.unknown()),
+  ip: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const AdminListAuditResponse = zod.array(AdminListAuditResponseItem);
+
+/**
+ * @summary Aggregated stats for the admin console
+ */
+export const AdminAnalyticsOverviewResponse = zod.object({
+  users: zod.object({
+    total: zod.number(),
+    active: zod.number(),
+    suspended: zod.number(),
+    banned: zod.number(),
+    admins: zod.number(),
+    superadmins: zod.number(),
+    moderators: zod.number(),
+    recent: zod.number(),
+  }),
+  content: zod.object({
+    destinations: zod.number(),
+    churches: zod.number(),
+    marketplaceItems: zod.number(),
+    mezmurs: zod.number(),
+    newsPosts: zod.number(),
+  }),
+  audit: zod.object({
+    total: zod.number(),
+    last24h: zod.number(),
+  }),
+});
+
+export const AdminGetSystemSettingsResponseItem = zod.object({
+  key: zod.string(),
+  value: zod.unknown(),
+  description: zod.string(),
+  updatedAt: zod.coerce.date(),
+  updatedBy: zod.union([zod.number(), zod.null()]).optional(),
+});
+export const AdminGetSystemSettingsResponse = zod.array(
+  AdminGetSystemSettingsResponseItem,
+);
+
+export const AdminUpdateSystemSettingBody = zod.object({
+  key: zod.string(),
+  value: zod.unknown(),
+  description: zod.string().optional(),
+});
+
+export const AdminUpdateSystemSettingResponse = zod.object({
+  key: zod.string(),
+  value: zod.unknown(),
+  description: zod.string(),
+  updatedAt: zod.coerce.date(),
+  updatedBy: zod.union([zod.number(), zod.null()]).optional(),
 });

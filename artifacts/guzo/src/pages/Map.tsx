@@ -1,7 +1,4 @@
 import { useMemo, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 import { useListChurches, getListChurchesQueryKey } from "@workspace/api-client-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -15,15 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-
-// Fix leaflet icon paths
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-});
+import { AdvancedMap, type AdvancedMapMarker } from "@/components/map/AdvancedMap";
 
 export function Map() {
   const { t } = useTranslation();
@@ -55,60 +44,83 @@ export function Map() {
     });
   }, [churches, country, search]);
 
-  const defaultCenter: [number, number] = [9.145, 40.489673];
+  const markers: AdvancedMapMarker[] = useMemo(
+    () =>
+      filtered.map((c) => ({
+        id: c.id,
+        lat: c.latitude,
+        lng: c.longitude,
+        title: c.name,
+        subtitle: `${c.city}, ${c.country}`,
+        imageUrl: c.imageUrl,
+        detailsHref: `${import.meta.env.BASE_URL || "/"}churches/${c.id}`.replace(/\/+/g, "/"),
+        badge: c.country,
+        meta: [
+          c.priest ? { label: `✟ ${c.priest}` } : null,
+          c.liturgyTimes ? { label: `🕓 ${c.liturgyTimes}` } : null,
+        ].filter(Boolean) as Array<{ label: string }>,
+      })),
+    [filtered],
+  );
 
   return (
-    <div className="h-full w-full relative bg-background flex flex-col" data-testid="page-map">
-      <div className="px-4 pt-4 pb-2 z-30 bg-background/85 backdrop-blur-md border-b border-border/40">
-        <div className="flex items-center justify-between gap-2 mb-2">
+    <div className="flex flex-col h-full bg-background pt-14">
+      {/* Top filter bar — sits below the floating menu/lang controls */}
+      <div className="px-3 pb-3 space-y-2 border-b border-border/40">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-serif font-bold text-primary">{t("map.title")}</h1>
-            <p className="text-[11px] text-muted-foreground">{t("map.subtitle")}</p>
+            <h1 className="text-xl font-serif font-bold text-foreground flex items-center gap-2">
+              <Globe2 className="h-5 w-5 text-primary" /> {t("map.title")}
+            </h1>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {filtered.length} {t("map.churches", { defaultValue: "churches" })} ·{" "}
+              {countries.length} {t("map.countries", { defaultValue: "countries" })}
+            </p>
           </div>
-          <div className="flex bg-card border border-border/60 rounded-full p-0.5 shadow-sm">
+          <div className="flex bg-card rounded-full p-0.5 border border-border/60">
             <button
+              type="button"
               onClick={() => setView("map")}
               data-testid="button-view-map"
+              aria-label="Map view"
               className={cn(
-                "px-3 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 hover-elevate active-elevate-2",
+                "h-8 w-8 rounded-full flex items-center justify-center text-xs",
                 view === "map" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
               )}
             >
-              <MapIcon className="h-3 w-3" /> {t("map.viewMap")}
+              <MapIcon className="h-4 w-4" />
             </button>
             <button
+              type="button"
               onClick={() => setView("list")}
               data-testid="button-view-list"
+              aria-label="List view"
               className={cn(
-                "px-3 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 hover-elevate active-elevate-2",
+                "h-8 w-8 rounded-full flex items-center justify-center text-xs",
                 view === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
               )}
             >
-              <List className="h-3 w-3" /> {t("map.viewList")}
+              <List className="h-4 w-4" />
             </button>
           </div>
         </div>
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={t("map.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 h-9 bg-card border-border/60 rounded-full text-sm"
-              data-testid="input-search-churches"
+              placeholder={t("map.searchPlaceholder", { defaultValue: "Search churches…" })}
+              className="pl-9 rounded-full h-9 text-sm"
+              data-testid="input-map-search-list"
             />
           </div>
           <Select value={country} onValueChange={setCountry}>
-            <SelectTrigger
-              className="h-9 w-[130px] rounded-full text-xs border-border/60 bg-card"
-              data-testid="select-country"
-            >
-              <Globe2 className="h-3 w-3 mr-1" />
+            <SelectTrigger className="w-[120px] h-9 rounded-full text-xs" data-testid="select-country">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("map.allCountries")}</SelectItem>
+              <SelectItem value="all">{t("map.allCountries", { defaultValue: "All" })}</SelectItem>
               {countries.map((c) => (
                 <SelectItem key={c} value={c}>
                   {c}
@@ -121,74 +133,10 @@ export function Map() {
 
       {view === "map" ? (
         <div className="flex-1 relative">
-          <MapContainer
-            center={defaultCenter}
-            zoom={3}
-            scrollWheelZoom
-            className="absolute inset-0 z-0"
-            zoomControl={false}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {filtered.map((church) => (
-              <Marker
-                key={church.id}
-                position={[church.latitude, church.longitude]}
-              >
-                <Popup className="rounded-xl overflow-hidden shadow-xl border-0 p-0 m-0">
-                  <div className="w-[240px] flex flex-col p-1" data-testid={`popup-church-${church.id}`}>
-                    <img
-                      src={church.imageUrl || "https://placehold.co/400x200"}
-                      className="w-full h-28 object-cover rounded-t-lg"
-                      alt={church.name}
-                    />
-                    <div className="p-3 space-y-2">
-                      <h3 className="font-bold text-sm leading-tight text-foreground font-serif">
-                        {church.name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <MapPin className="h-3 w-3 shrink-0" />
-                        <span className="truncate">{church.city}, {church.country}</span>
-                      </p>
-                      {church.priest && (
-                        <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                          <User className="h-3 w-3 shrink-0" />
-                          <span className="truncate">{church.priest}</span>
-                        </p>
-                      )}
-                      {church.liturgyTimes && (
-                        <p className="text-[11px] text-muted-foreground flex items-start gap-1">
-                          <Clock className="h-3 w-3 shrink-0 mt-0.5" />
-                          <span className="line-clamp-2">{church.liturgyTimes}</span>
-                        </p>
-                      )}
-                      <Link href={`/churches/${church.id}`}>
-                        <span
-                          className="block text-xs font-semibold text-primary-foreground mt-2 px-3 py-1.5 rounded-full text-center cursor-pointer"
-                          style={{ background: "var(--gold-gradient)" }}
-                          data-testid={`link-church-detail-${church.id}`}
-                        >
-                          {t("map.viewDetails", { defaultValue: "View Church" })} →
-                        </span>
-                      </Link>
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
-          <div className="absolute bottom-4 left-4 right-4 z-[400] pointer-events-none">
-            <div className="bg-background/90 backdrop-blur-md border border-border/60 rounded-2xl px-4 py-2 shadow-md text-center pointer-events-auto">
-              <span className="text-xs font-semibold tabular-nums">
-                {filtered.length} {filtered.length === 1 ? t("nav.map") : t("nav.map")}
-              </span>
-            </div>
-          </div>
+          <AdvancedMap markers={markers} className="h-full" />
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-3 space-y-2 pb-20">
           {filtered.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <MapPin className="h-10 w-10 mx-auto opacity-30 mb-3" />

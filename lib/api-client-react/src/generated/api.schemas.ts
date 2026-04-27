@@ -17,8 +17,17 @@ export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 export const UserRole = {
   user: "user",
+  moderator: "moderator",
   admin: "admin",
   superadmin: "superadmin",
+} as const;
+
+export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus];
+
+export const UserStatus = {
+  active: "active",
+  suspended: "suspended",
+  banned: "banned",
 } as const;
 
 export interface User {
@@ -26,6 +35,10 @@ export interface User {
   email: string;
   name: string;
   role: UserRole;
+  status: UserStatus;
+  suspendedUntil?: string | null;
+  notes: string;
+  createdAt: string;
 }
 
 export interface MaybeUser {
@@ -261,6 +274,92 @@ export interface UpdateNewsBody {
   readMinutes?: number;
 }
 
+export type AdminUpdateUserBodyRole =
+  (typeof AdminUpdateUserBodyRole)[keyof typeof AdminUpdateUserBodyRole];
+
+export const AdminUpdateUserBodyRole = {
+  user: "user",
+  moderator: "moderator",
+  admin: "admin",
+  superadmin: "superadmin",
+} as const;
+
+export type AdminUpdateUserBodyStatus =
+  (typeof AdminUpdateUserBodyStatus)[keyof typeof AdminUpdateUserBodyStatus];
+
+export const AdminUpdateUserBodyStatus = {
+  active: "active",
+  suspended: "suspended",
+  banned: "banned",
+} as const;
+
+export interface AdminUpdateUserBody {
+  name?: string;
+  role?: AdminUpdateUserBodyRole;
+  status?: AdminUpdateUserBodyStatus;
+  suspendedUntil?: string | null;
+  notes?: string;
+}
+
+export type AuditLogEntryMetadata = { [key: string]: unknown };
+
+export interface AuditLogEntry {
+  id: string;
+  actorId?: number | null;
+  actorEmail: string;
+  actorRole: string;
+  action: string;
+  targetType: string;
+  targetId: string;
+  metadata: AuditLogEntryMetadata;
+  ip: string;
+  createdAt: string;
+}
+
+export type AdminAnalyticsUsers = {
+  total: number;
+  active: number;
+  suspended: number;
+  banned: number;
+  admins: number;
+  superadmins: number;
+  moderators: number;
+  recent: number;
+};
+
+export type AdminAnalyticsContent = {
+  destinations: number;
+  churches: number;
+  marketplaceItems: number;
+  mezmurs: number;
+  newsPosts: number;
+};
+
+export type AdminAnalyticsAudit = {
+  total: number;
+  last24h: number;
+};
+
+export interface AdminAnalytics {
+  users: AdminAnalyticsUsers;
+  content: AdminAnalyticsContent;
+  audit: AdminAnalyticsAudit;
+}
+
+export interface SystemSetting {
+  key: string;
+  value: unknown;
+  description: string;
+  updatedAt: string;
+  updatedBy?: number | null;
+}
+
+export interface UpdateSystemSettingBody {
+  key: string;
+  value: unknown;
+  description?: string;
+}
+
 export type Login401 = {
   error: string;
 };
@@ -288,4 +387,24 @@ export type ListMezmursParams = {
 export type ListNewsParams = {
   q?: string;
   category?: string;
+};
+
+export type AdminListUsersParams = {
+  q?: string;
+  role?: string;
+  status?: string;
+  /**
+   * @maximum 500
+   */
+  limit?: number;
+};
+
+export type AdminListAuditParams = {
+  actorId?: number;
+  action?: string;
+  targetType?: string;
+  /**
+   * @maximum 500
+   */
+  limit?: number;
 };

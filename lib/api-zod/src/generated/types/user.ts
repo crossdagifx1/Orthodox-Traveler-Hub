@@ -6,10 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { UserRole } from "./userRole";
+import type { UserStatus } from "./userStatus";
 
 export interface User {
   id: string;
   email: string;
   name: string;
   role: UserRole;
+  status: UserStatus;
+  suspendedUntil?: Date | null;
+  notes: string;
+  createdAt: Date;
 }

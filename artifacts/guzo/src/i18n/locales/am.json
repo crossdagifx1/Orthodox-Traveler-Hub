@@ -122,7 +122,9 @@
     "searchPlaceholder": "ቤተ ክርስቲያን ይፈልጉ…",
     "directions": "አቅጣጫ ያግኙ",
     "noChurches": "ምንም ቤተ ክርስቲያን አልተገኘም",
-    "viewDetails": "ቤተ ክርስቲያኑን ይመልከቱ"
+    "viewDetails": "ቤተ ክርስቲያኑን ይመልከቱ",
+    "churches": "አብያተ ክርስቲያናት",
+    "countries": "ሀገራት"
   },
   "church": {
     "address": "አድራሻ",
@@ -291,7 +293,36 @@
     "manageNews": "ዜናዎችን አስተዳድር",
     "totalCount": "ጠቅላላ {{count}}",
     "addNew": "አዲስ ጨምር",
-    "confirmDelete": "በትክክል ማጥፋት ይፈልጋሉ?"
+    "confirmDelete": "በትክክል ማጥፋት ይፈልጋሉ?",
+    "minRole": "የሚያስፈልገው ሚና",
+    "users": {
+      "title": "የተጠቃሚዎች አስተዳደር",
+      "subtitle": "ሚናዎችን ያስተዳድሩ፣ ያቆሙ ወይም ያግዱ",
+      "total": "ተጠቃሚዎች",
+      "roleUpdated": "ሚና ተለውጧል",
+      "statusUpdated": "ሁኔታ ተለውጧል",
+      "deleted": "ተጠቃሚ ተሰርዟል",
+      "empty": "ምንም ተጠቃሚ አልተገኘም"
+    },
+    "audit": {
+      "title": "የክንውን ምዝገባ",
+      "subtitle": "የእያንዳንዱ ልዩ ድርጊት ምዝገባ",
+      "entries": "ምዝገባዎች",
+      "empty": "ምንም ምዝገባ የለም"
+    },
+    "analytics": {
+      "title": "ሪፖርቶች",
+      "subtitle": "የተጠቃሚና ይዘት መረጃ",
+      "users": "ተጠቃሚዎች",
+      "content": "ይዘት",
+      "audit": "ምዝገባ"
+    },
+    "settings": {
+      "title": "የስርዓት ቅንብሮች",
+      "subtitle": "የቁልፍ-እሴት ውቅረት",
+      "saved": "ተቀምጧል",
+      "add": "አዲስ ቅንብር ይጨምሩ"
+    }
   },
   "verses": [
     {

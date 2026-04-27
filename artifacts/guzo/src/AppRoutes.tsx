@@ -19,6 +19,10 @@ import { AdminChurches } from "./pages/admin/AdminChurches";
 import { AdminMarketplace } from "./pages/admin/AdminMarketplace";
 import { AdminMezmurs } from "./pages/admin/AdminMezmurs";
 import { AdminNews } from "./pages/admin/AdminNews";
+import { AdminUsers } from "./pages/admin/AdminUsers";
+import { AdminAudit } from "./pages/admin/AdminAudit";
+import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
+import { AdminSettings } from "./pages/admin/AdminSettings";
 import { AdminGuard } from "@/components/auth/AdminGuard";
 
 export function AppRoutes() {
@@ -30,17 +34,17 @@ export function AppRoutes() {
         <Route path="/destinations/:id" component={DestinationDetail} />
         <Route path="/map" component={Map} />
         <Route path="/churches/:id" component={ChurchDetail} />
-        
+
         <Route path="/marketplace/new" component={MarketplaceNew} />
         <Route path="/marketplace/:id" component={MarketplaceDetail} />
         <Route path="/marketplace" component={Marketplace} />
-        
+
         <Route path="/mezmurs/:id" component={MezmurDetail} />
         <Route path="/mezmurs" component={Mezmurs} />
-        
+
         <Route path="/news/:id" component={NewsDetail} />
         <Route path="/news" component={News} />
-        
+
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/destinations">
           <AdminGuard>
@@ -65,6 +69,26 @@ export function AppRoutes() {
         <Route path="/admin/news">
           <AdminGuard>
             <AdminNews />
+          </AdminGuard>
+        </Route>
+        <Route path="/admin/users">
+          <AdminGuard>
+            <AdminUsers />
+          </AdminGuard>
+        </Route>
+        <Route path="/admin/audit">
+          <AdminGuard>
+            <AdminAudit />
+          </AdminGuard>
+        </Route>
+        <Route path="/admin/analytics">
+          <AdminGuard>
+            <AdminAnalytics />
+          </AdminGuard>
+        </Route>
+        <Route path="/admin/settings">
+          <AdminGuard minRole="superadmin">
+            <AdminSettings />
           </AdminGuard>
         </Route>
       </Switch>

@@ -3,12 +3,28 @@ import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+export type AuthRole = "user" | "moderator" | "admin" | "superadmin";
+
 export type AuthUser = {
   id: number;
   email: string;
   name: string;
-  role: "user" | "admin" | "superadmin";
+  role: AuthRole;
+  status: "active" | "suspended" | "banned";
 };
+
+/** Role hierarchy — higher number = more powerful. */
+export const ROLE_RANK: Record<AuthRole, number> = {
+  user: 0,
+  moderator: 10,
+  admin: 100,
+  superadmin: 1000,
+};
+
+export function hasRoleAtLeast(user: AuthUser | undefined, min: AuthRole): boolean {
+  if (!user) return false;
+  return ROLE_RANK[user.role] >= ROLE_RANK[min];
+}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -69,11 +85,31 @@ export async function attachUser(
         .where(eq(usersTable.id, uid))
         .limit(1);
       if (u) {
+        // Block any session belonging to a banned account.
+        if (u.status === "banned") {
+          next();
+          return;
+        }
+        // Auto-clear expired suspensions.
+        let effectiveStatus = (u.status as AuthUser["status"]) ?? "active";
+        if (
+          effectiveStatus === "suspended" &&
+          u.suspendedUntil &&
+          new Date(u.suspendedUntil).getTime() <= Date.now()
+        ) {
+          effectiveStatus = "active";
+        }
+        if (effectiveStatus === "suspended") {
+          // Don't attach the user — read-only browsing only.
+          next();
+          return;
+        }
         req.user = {
           id: u.id,
           email: u.email,
           name: u.name,
-          role: (u.role as AuthUser["role"]) ?? "user",
+          role: (u.role as AuthRole) ?? "user",
+          status: effectiveStatus,
         };
       }
     }
@@ -94,11 +130,39 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction) {
     res.status(401).json({ error: "Login required" });
     return;
   }
-  if (req.user.role !== "admin" && req.user.role !== "superadmin") {
+  if (!hasRoleAtLeast(req.user, "admin")) {
     res.status(403).json({ error: "Admin only" });
     return;
   }
   next();
+}
+
+/** Require super-admin. The most powerful role. */
+export function requireSuperAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) {
+    res.status(401).json({ error: "Login required" });
+    return;
+  }
+  if (req.user.role !== "superadmin") {
+    res.status(403).json({ error: "Super-admin only" });
+    return;
+  }
+  next();
+}
+
+/** Generic minimum-role guard. */
+export function requireRole(min: AuthRole) {
+  return function (req: Request, res: Response, next: NextFunction) {
+    if (!req.user) {
+      res.status(401).json({ error: "Login required" });
+      return;
+    }
+    if (!hasRoleAtLeast(req.user, min)) {
+      res.status(403).json({ error: "Insufficient privileges" });
+      return;
+    }
+    next();
+  };
 }
 
 export function setAuthCookie(res: Response, userId: number) {

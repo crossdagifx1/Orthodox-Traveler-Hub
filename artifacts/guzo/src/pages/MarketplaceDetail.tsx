@@ -1,7 +1,27 @@
-import { useGetMarketplaceItem, getGetMarketplaceItemQueryKey } from "@workspace/api-client-react";
-import { useRoute } from "wouter";
-import { ArrowLeft, MapPin, User as Seller, CheckCircle2, Package, Heart, Share2 } from "lucide-react";
+import {
+  useGetMarketplaceItem,
+  getGetMarketplaceItemQueryKey,
+  useListMarketplaceItems,
+  getListMarketplaceItemsQueryKey,
+} from "@workspace/api-client-react";
+import { useRoute, Link } from "wouter";
+import {
+  ArrowLeft,
+  MapPin,
+  User as Seller,
+  CheckCircle2,
+  Package,
+  Heart,
+  Share2,
+  Truck,
+  ShieldCheck,
+  Sparkles,
+  MessageCircle,
+  Tag,
+  Award,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/AuthProvider";
 import { useWishlist } from "@/providers/WishlistProvider";
@@ -18,10 +38,24 @@ export function MarketplaceDetail() {
     query: { enabled: !!id, queryKey: getGetMarketplaceItemQueryKey(id) },
   });
 
+  const { data: allItems } = useListMarketplaceItems(
+    {},
+    { query: { queryKey: getListMarketplaceItemsQueryKey({}) } },
+  );
+
+  const related = useMemo(() => {
+    if (!item || !allItems) return [];
+    return allItems
+      .filter((i) => i.id !== item.id && i.category === item.category)
+      .slice(0, 6);
+  }, [item, allItems]);
+
   if (isLoading)
     return (
       <div className="p-4 space-y-4">
         <div className="w-full aspect-square bg-muted animate-pulse rounded-2xl" />
+        <div className="h-8 bg-muted animate-pulse rounded w-3/4" />
+        <div className="h-4 bg-muted animate-pulse rounded w-full" />
       </div>
     );
   if (!item)
@@ -40,123 +74,286 @@ export function MarketplaceDetail() {
   const onShare = async () => {
     const url = window.location.href;
     if (navigator.share) {
-      try {
-        await navigator.share({ title: item.title, url });
-      } catch {
-        /* dismissed */
-      }
+      try { await navigator.share({ title: item.title, url }); } catch { /* */ }
     } else {
-      await navigator.clipboard.writeText(url);
+      try { await navigator.clipboard.writeText(url); } catch { /* */ }
     }
   };
 
   return (
     <div className="pb-32 bg-background min-h-full">
-      <div className="relative w-full aspect-square bg-muted/20">
+      {/* Image hero */}
+      <div className="relative w-full aspect-square bg-gradient-to-br from-muted/40 to-card">
         <img
           src={item.imageUrl || "https://placehold.co/800x800"}
           alt={item.title}
-          className="w-full h-full object-contain p-4"
+          className="w-full h-full object-contain p-6"
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-4 left-4 text-primary bg-background/60 hover:bg-background/90 rounded-full backdrop-blur-md shadow-sm border border-border/50"
-          onClick={() => window.history.back()}
-          data-testid="button-back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="absolute top-4 right-4 flex gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="bg-background/60 hover:bg-background/90 rounded-full backdrop-blur-md shadow-sm border border-border/50"
-            onClick={onShare}
-            data-testid="button-share"
-          >
-            <Share2 className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "bg-background/60 hover:bg-background/90 rounded-full backdrop-blur-md shadow-sm border border-border/50",
-              saved && "text-primary",
-            )}
-            onClick={() => wishlist.toggle(item.id)}
-            data-testid="button-wishlist"
-            aria-label={saved ? t("market.removeFromWishlist") : t("market.addToWishlist")}
-          >
-            <Heart className={cn("h-5 w-5", saved && "fill-current")} />
-          </Button>
-        </div>
-      </div>
 
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-4 mb-2">
-          <h1 className="text-2xl font-serif font-bold text-foreground leading-tight">
-            {item.title}
-          </h1>
-          <div className="text-right shrink-0">
-            <div className="text-2xl font-bold text-primary">{item.price}</div>
-            <div className="text-xs font-medium text-muted-foreground uppercase">
-              {item.currency}
-            </div>
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-foreground bg-background/80 hover:bg-background/95 rounded-full backdrop-blur-md shadow-sm border border-border/60"
+            onClick={() => window.history.back()}
+            data-testid="button-back"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-background/80 hover:bg-background/95 rounded-full backdrop-blur-md shadow-sm border border-border/60"
+              onClick={onShare}
+              data-testid="button-share"
+            >
+              <Share2 className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "bg-background/80 hover:bg-background/95 rounded-full backdrop-blur-md shadow-sm border border-border/60",
+                saved && "text-primary",
+              )}
+              onClick={() => wishlist.toggle(item.id)}
+              data-testid="button-wishlist"
+              aria-label={saved ? t("market.removeFromWishlist") : t("market.addToWishlist")}
+            >
+              <Heart className={cn("h-5 w-5", saved && "fill-current")} />
+            </Button>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-6">
-          <span className="bg-muted px-3 py-1 rounded-full text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            {item.category}
-          </span>
-          {item.condition && (
-            <span className="bg-muted px-3 py-1 rounded-full text-xs font-medium text-muted-foreground">
-              {item.condition}
+        {item.isFeatured && (
+          <div className="absolute bottom-3 left-3">
+            <span
+              className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.2em] font-bold px-2.5 py-1 rounded-full text-primary-foreground shadow"
+              style={{ background: "var(--gold-gradient)" }}
+            >
+              <Sparkles className="h-3 w-3" /> {t("common.featured")}
             </span>
-          )}
-          {item.inStock ? (
-            <span className="bg-green-500/10 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3" /> {t("market.inStock")}
-            </span>
-          ) : (
-            <span className="bg-red-500/10 text-red-700 dark:text-red-300 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-              <Package className="h-3 w-3" /> {t("market.outOfStock")}
-            </span>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
 
-        <div className="prose prose-sm dark:prose-invert max-w-none mb-8">
-          <p>{item.description}</p>
-        </div>
-
-        <div className="bg-card border border-border/50 rounded-2xl p-4 mb-8 shadow-sm">
-          <h3 className="text-sm font-bold text-foreground mb-3 font-serif uppercase tracking-widest opacity-80">
-            {t("market.seller")}
-          </h3>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <Seller className="h-6 w-6" />
+      <div className="px-5 -mt-4 relative z-10 space-y-5">
+        {/* Title + price card */}
+        <div className="bg-card border border-border/60 rounded-2xl shadow-md p-5">
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="min-w-0">
+              <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground font-bold mb-1 flex items-center gap-1">
+                <Tag className="h-3 w-3" /> {item.category}
+              </div>
+              <h1 className="text-2xl font-serif font-bold text-foreground leading-tight">
+                {item.title}
+              </h1>
             </div>
-            <div>
-              <div className="font-bold text-foreground">{item.sellerName}</div>
-              <div className="text-xs text-muted-foreground flex items-center mt-0.5">
-                <MapPin className="h-3 w-3 mr-1" /> {item.sellerLocation || "—"}
+            <div className="text-right shrink-0">
+              <div className="text-2xl font-bold text-primary tabular-nums">
+                {Number(item.price).toFixed(0)}
+              </div>
+              <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                {item.currency}
               </div>
             </div>
           </div>
+
+          <div className="flex flex-wrap gap-2">
+            {item.condition && (
+              <Chip icon={<Award className="h-3 w-3" />} label={item.condition} />
+            )}
+            {item.inStock ? (
+              <Chip
+                icon={<CheckCircle2 className="h-3 w-3" />}
+                label={t("market.inStock")}
+                variant="success"
+              />
+            ) : (
+              <Chip
+                icon={<Package className="h-3 w-3" />}
+                label={t("market.outOfStock")}
+                variant="danger"
+              />
+            )}
+            {item.sellerLocation && (
+              <Chip icon={<MapPin className="h-3 w-3" />} label={item.sellerLocation} />
+            )}
+          </div>
         </div>
 
-        <div className="fixed bottom-[80px] left-0 right-0 p-4 bg-background/85 backdrop-blur-md border-t border-border/50 md:absolute md:bottom-0 z-30">
+        {/* Description */}
+        <Section title={t("market.description", { defaultValue: "About this item" })}>
+          <div className="prose prose-sm dark:prose-invert prose-p:text-foreground/85 prose-p:leading-relaxed max-w-none">
+            {item.description.split("\n\n").map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+          </div>
+        </Section>
+
+        {/* Seller card */}
+        <Section title={t("market.seller")}>
+          <div className="bg-card border border-border/60 rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <Seller className="h-6 w-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-foreground truncate">{item.sellerName}</div>
+                <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
+                  <MapPin className="h-3 w-3" /> {item.sellerLocation || "—"}
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full text-xs"
+                onClick={onContact}
+                data-testid="button-message-seller"
+              >
+                <MessageCircle className="h-3.5 w-3.5 mr-1" />
+                {t("market.message", { defaultValue: "Message" })}
+              </Button>
+            </div>
+          </div>
+        </Section>
+
+        {/* Shipping & care */}
+        <Section title={t("market.shippingCare", { defaultValue: "Shipping & care" })}>
+          <div className="grid grid-cols-1 gap-3">
+            <InfoCard
+              icon={<Truck className="h-5 w-5" />}
+              title={t("market.shipping", { defaultValue: "Shipping" })}
+              body="Items ship from the seller's location, typically within 3 business days. International orders use tracked airmail (10–18 business days). All packages include moisture-resistant wrapping appropriate for the item type."
+            />
+            <InfoCard
+              icon={<ShieldCheck className="h-5 w-5" />}
+              title={t("market.authenticity", { defaultValue: "Authenticity" })}
+              body="Every item on Guzo is reviewed by our team for authenticity and ethical sourcing. Liturgical items are blessed only at the buyer's local church — Guzo does not sell consecrated tabotat or holy chrism."
+            />
+            <InfoCard
+              icon={<Award className="h-5 w-5" />}
+              title={t("market.care", { defaultValue: "Care instructions" })}
+              body="Hand-painted icons should be kept away from direct sunlight and humidity. Wood items occasionally benefit from a light wipe with beeswax polish. Brass crosses naturally develop a warm patina; clean only with a soft cloth."
+            />
+          </div>
+        </Section>
+
+        {/* Related items */}
+        {related.length > 0 && (
+          <Section title={t("market.related", { defaultValue: "More from this category" })}>
+            <div className="flex gap-3 overflow-x-auto pb-2 -mr-5 pr-5 scrollbar-hide">
+              {related.map((r) => (
+                <Link key={r.id} href={`/marketplace/${r.id}`}>
+                  <div
+                    className="w-36 shrink-0 rounded-2xl overflow-hidden bg-card border border-border/60 hover-elevate cursor-pointer"
+                    data-testid={`card-related-item-${r.id}`}
+                  >
+                    <div className="aspect-square bg-muted/40">
+                      <img src={r.imageUrl} alt={r.title} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="p-2">
+                      <div className="text-xs font-medium line-clamp-2 leading-tight">
+                        {r.title}
+                      </div>
+                      <div className="text-xs font-bold text-primary mt-1 tabular-nums">
+                        {Number(r.price).toFixed(0)}{" "}
+                        <span className="text-[9px] text-muted-foreground font-semibold">
+                          {r.currency}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </Section>
+        )}
+      </div>
+
+      {/* Sticky CTA */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-md border-t border-border/60 md:absolute md:bottom-0 z-30">
+        <div className="flex gap-2">
           <Button
-            className="w-full h-12 rounded-full font-medium text-base shadow-md"
+            variant="outline"
+            className="rounded-full h-12 px-5 shadow-sm"
+            onClick={() => wishlist.toggle(item.id)}
+            data-testid="button-wishlist-bottom"
+          >
+            <Heart className={cn("h-5 w-5", saved && "fill-current text-primary")} />
+          </Button>
+          <Button
+            className="flex-1 h-12 rounded-full font-semibold shadow-md text-base"
             onClick={onContact}
             disabled={!item.inStock}
             data-testid="button-contact-seller"
+            style={item.inStock ? { background: "var(--gold-gradient)" } : undefined}
           >
             {item.inStock ? t("market.contactSeller") : t("market.outOfStock")}
           </Button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-primary mb-3">
+        {title}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Chip({
+  icon,
+  label,
+  variant,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  variant?: "success" | "danger";
+}) {
+  const cls =
+    variant === "success"
+      ? "bg-green-500/10 text-green-700 dark:text-green-300"
+      : variant === "danger"
+        ? "bg-red-500/10 text-red-700 dark:text-red-300"
+        : "bg-muted text-muted-foreground";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium",
+        cls,
+      )}
+    >
+      {icon}
+      {label}
+    </span>
+  );
+}
+
+function InfoCard({
+  icon,
+  title,
+  body,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="bg-card border border-border/60 rounded-2xl p-4 flex gap-3 shadow-sm">
+      <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <div className="text-sm font-semibold text-foreground mb-1">{title}</div>
+        <div className="text-xs text-muted-foreground leading-relaxed">{body}</div>
       </div>
     </div>
   );

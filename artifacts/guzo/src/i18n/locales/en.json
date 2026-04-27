@@ -15,7 +15,10 @@
     "admin": "Admin",
     "viewAll": "View all",
     "back": "Back",
-    "settings": "Settings"
+    "settings": "Settings",
+    "menu": "Menu",
+    "account": "Account",
+    "exploreMore": "Explore more"
   },
   "auth": {
     "login": "Sign in",
@@ -101,7 +104,13 @@
     "about": "About this place",
     "noDestinations": "No destinations found",
     "viewOnMap": "View on map",
-    "share": "Share place"
+    "share": "Share place",
+    "pilgrimGuide": "Pilgrim's Guide",
+    "fastingTip": "Fasting tradition",
+    "dressCode": "Dress & conduct",
+    "nearbyChurches": "Churches in the same country",
+    "exploreMore": "More holy sites nearby",
+    "prayer": "Pilgrim's prayer"
   },
   "map": {
     "title": "Find a Church",
@@ -112,7 +121,8 @@
     "allCountries": "All countries",
     "searchPlaceholder": "Search churches…",
     "directions": "Get directions",
-    "noChurches": "No churches found"
+    "noChurches": "No churches found",
+    "viewDetails": "View Church"
   },
   "church": {
     "address": "Address",
@@ -163,7 +173,14 @@
       "sellerLocation": "Seller location",
       "publish": "Publish",
       "creating": "Publishing…"
-    }
+    },
+    "description": "About this item",
+    "message": "Message",
+    "shippingCare": "Shipping & care",
+    "shipping": "Shipping",
+    "authenticity": "Authenticity",
+    "care": "Care instructions",
+    "related": "More from this category"
   },
   "mezmurs": {
     "title": "Mezmurs",
@@ -187,7 +204,12 @@
     "queue": "Up next",
     "noMezmurs": "No mezmurs yet",
     "duration": "Duration",
-    "language": "Language"
+    "language": "Language",
+    "plays": "Plays",
+    "aboutArtist": "About the artist",
+    "tradition": "Ethiopian Orthodox Tewahedo Mezmur tradition",
+    "occasion": "Occasion",
+    "relatedInCategory": "More in this tradition"
   },
   "news": {
     "title": "News & Teachings",
@@ -205,7 +227,10 @@
     "noPosts": "No articles yet",
     "relatedPosts": "Related articles",
     "publishedOn": "Published on",
-    "shareArticle": "Share article"
+    "shareArticle": "Share article",
+    "enjoyed": "Enjoyed this story?",
+    "shareEncouragement": "Share with the Tewahedo community.",
+    "moreStories": "More stories"
   },
   "settings": {
     "title": "Settings",
@@ -238,9 +263,19 @@
       "nineveh": "Fast of Nineveh"
     },
     "months": {
-      "1": "Meskerem", "2": "Tikimt", "3": "Hidar", "4": "Tahsas",
-      "5": "Tir", "6": "Yekatit", "7": "Megabit", "8": "Miyazya",
-      "9": "Ginbot", "10": "Sene", "11": "Hamle", "12": "Nehasse", "13": "Pagume"
+      "1": "Meskerem",
+      "2": "Tikimt",
+      "3": "Hidar",
+      "4": "Tahsas",
+      "5": "Tir",
+      "6": "Yekatit",
+      "7": "Megabit",
+      "8": "Miyazya",
+      "9": "Ginbot",
+      "10": "Sene",
+      "11": "Hamle",
+      "12": "Nehasse",
+      "13": "Pagume"
     }
   },
   "admin": {
@@ -259,12 +294,33 @@
     "confirmDelete": "Delete this item?"
   },
   "verses": [
-    { "ref": "Psalm 23:1", "text": "The Lord is my shepherd; I shall not want." },
-    { "ref": "Matt 5:8", "text": "Blessed are the pure in heart, for they shall see God." },
-    { "ref": "John 3:16", "text": "For God so loved the world that He gave His only begotten Son." },
-    { "ref": "Psalm 27:1", "text": "The Lord is my light and my salvation; whom shall I fear?" },
-    { "ref": "Rom 8:38", "text": "Neither death nor life, nor angels nor principalities, can separate us." },
-    { "ref": "Phil 4:13", "text": "I can do all things through Christ who strengthens me." },
-    { "ref": "Isa 40:31", "text": "Those who hope in the Lord will renew their strength." }
+    {
+      "ref": "Psalm 23:1",
+      "text": "The Lord is my shepherd; I shall not want."
+    },
+    {
+      "ref": "Matt 5:8",
+      "text": "Blessed are the pure in heart, for they shall see God."
+    },
+    {
+      "ref": "John 3:16",
+      "text": "For God so loved the world that He gave His only begotten Son."
+    },
+    {
+      "ref": "Psalm 27:1",
+      "text": "The Lord is my light and my salvation; whom shall I fear?"
+    },
+    {
+      "ref": "Rom 8:38",
+      "text": "Neither death nor life, nor angels nor principalities, can separate us."
+    },
+    {
+      "ref": "Phil 4:13",
+      "text": "I can do all things through Christ who strengthens me."
+    },
+    {
+      "ref": "Isa 40:31",
+      "text": "Those who hope in the Lord will renew their strength."
+    }
   ]
 }

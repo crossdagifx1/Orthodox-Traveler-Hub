@@ -66,68 +66,73 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* LIGHT MODE - Guzo Theme (Orthodox Liturgical) */
+/* LIGHT MODE - Guzo Theme (Liturgical Gold on Parchment) */
 :root {
-  --button-outline: rgba(50, 20, 25, 0.10);
-  --badge-outline: rgba(50, 20, 25, 0.05);
-  --opaque-button-border-intensity: -8;
+  --button-outline: rgba(80, 60, 15, 0.12);
+  --badge-outline: rgba(80, 60, 15, 0.06);
+  --opaque-button-border-intensity: -10;
 
-  --elevate-1: rgba(50, 20, 25, 0.03);
-  --elevate-2: rgba(50, 20, 25, 0.08);
+  --elevate-1: rgba(120, 90, 20, 0.04);
+  --elevate-2: rgba(120, 90, 20, 0.10);
 
   /* Ivory / Parchment Background */
-  --background: 42 45% 96%;
-  /* Deep Liturgical Wine text */
-  --foreground: 345 50% 20%;
+  --background: 42 50% 97%;
+  /* Deep liturgical brown-wine text */
+  --foreground: 28 35% 14%;
 
-  /* Borders slightly darker ivory */
-  --border: 42 30% 88%;
+  /* Borders: warm sand */
+  --border: 40 35% 86%;
 
-  /* Cards are slightly lighter parchment */
-  --card: 42 40% 98%;
-  --card-foreground: 345 50% 20%;
-  --card-border: 42 30% 90%;
+  /* Cards: soft cream */
+  --card: 42 55% 99%;
+  --card-foreground: 28 35% 14%;
+  --card-border: 40 35% 90%;
 
-  --sidebar: 42 40% 98%;
-  --sidebar-foreground: 345 50% 20%;
-  --sidebar-border: 42 30% 90%;
-  --sidebar-primary: 345 50% 30%;
-  --sidebar-primary-foreground: 45 60% 85%;
-  --sidebar-accent: 42 30% 90%;
-  --sidebar-accent-foreground: 345 50% 20%;
-  --sidebar-ring: 345 50% 30%;
+  --sidebar: 42 55% 99%;
+  --sidebar-foreground: 28 35% 14%;
+  --sidebar-border: 40 35% 90%;
+  --sidebar-primary: 42 75% 42%;
+  --sidebar-primary-foreground: 42 60% 98%;
+  --sidebar-accent: 40 50% 92%;
+  --sidebar-accent-foreground: 28 35% 14%;
+  --sidebar-ring: 42 75% 42%;
 
-  --popover: 42 40% 98%;
-  --popover-foreground: 345 50% 20%;
-  --popover-border: 42 30% 90%;
+  --popover: 42 55% 99%;
+  --popover-foreground: 28 35% 14%;
+  --popover-border: 40 35% 90%;
 
-  /* Deep Liturgical Wine */
-  --primary: 345 50% 30%;
-  --primary-foreground: 45 60% 85%;
+  /* === LITURGICAL GOLD === */
+  --primary: 42 75% 42%;
+  --primary-foreground: 42 60% 98%;
 
-  /* Warm Gold */
-  --secondary: 45 60% 60%;
-  --secondary-foreground: 345 50% 20%;
+  /* Deep wine as secondary (was the old primary) */
+  --secondary: 345 55% 30%;
+  --secondary-foreground: 42 60% 96%;
 
-  /* Deep Forest Green */
-  --muted: 150 20% 90%;
-  --muted-foreground: 150 30% 30%;
+  /* Soft sage for "muted" surfaces */
+  --muted: 40 35% 92%;
+  --muted-foreground: 28 25% 35%;
 
-  /* Oxblood accent */
-  --accent: 350 40% 90%;
-  --accent-foreground: 350 60% 30%;
+  /* Soft champagne accent */
+  --accent: 42 55% 90%;
+  --accent-foreground: 42 75% 28%;
 
-  --destructive: 0 70% 40%;
-  --destructive-foreground: 42 45% 96%;
+  --destructive: 0 65% 42%;
+  --destructive-foreground: 42 50% 97%;
 
-  --input: 42 30% 85%;
-  --ring: 345 50% 30%;
+  --input: 40 30% 86%;
+  --ring: 42 75% 42%;
 
-  --chart-1: 345 50% 30%;
-  --chart-2: 45 60% 60%;
-  --chart-3: 150 40% 25%;
-  --chart-4: 350 60% 20%;
-  --chart-5: 42 60% 40%;
+  --chart-1: 42 75% 42%;
+  --chart-2: 345 55% 30%;
+  --chart-3: 28 50% 35%;
+  --chart-4: 18 70% 45%;
+  --chart-5: 42 60% 60%;
+
+  /* Gold-tinted gradient utilities */
+  --gold-gradient: linear-gradient(135deg, hsl(48 80% 55%), hsl(38 75% 38%));
+  --gold-gradient-soft: linear-gradient(135deg, hsl(45 70% 88%), hsl(40 60% 78%));
+  --wine-gradient: linear-gradient(135deg, hsl(345 55% 30%), hsl(345 60% 20%));
 
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: 'EB Garamond', 'Cormorant', 'Georgia', serif;
@@ -135,14 +140,14 @@
   
   --radius: 1rem;
   
-  --shadow-2xs: 0px 2px 0px 0px hsl(345 50% 30% / 0.05);
-  --shadow-xs: 0px 2px 0px 0px hsl(345 50% 30% / 0.05);
-  --shadow-sm: 0px 2px 0px 0px hsl(345 50% 30% / 0.05), 0px 1px 2px -1px hsl(345 50% 30% / 0.05);
-  --shadow: 0px 2px 0px 0px hsl(345 50% 30% / 0.05), 0px 1px 2px -1px hsl(345 50% 30% / 0.05);
-  --shadow-md: 0px 2px 0px 0px hsl(345 50% 30% / 0.05), 0px 2px 4px -1px hsl(345 50% 30% / 0.05);
-  --shadow-lg: 0px 2px 0px 0px hsl(345 50% 30% / 0.05), 0px 4px 6px -1px hsl(345 50% 30% / 0.05);
-  --shadow-xl: 0px 2px 0px 0px hsl(345 50% 30% / 0.05), 0px 8px 10px -1px hsl(345 50% 30% / 0.05);
-  --shadow-2xl: 0px 2px 0px 0px hsl(345 50% 30% / 0.05);
+  --shadow-2xs: 0px 2px 0px 0px hsl(42 75% 42% / 0.05);
+  --shadow-xs: 0px 2px 0px 0px hsl(42 75% 42% / 0.06);
+  --shadow-sm: 0px 2px 0px 0px hsl(42 75% 42% / 0.06), 0px 1px 2px -1px hsl(28 35% 14% / 0.06);
+  --shadow: 0px 2px 0px 0px hsl(42 75% 42% / 0.06), 0px 1px 2px -1px hsl(28 35% 14% / 0.06);
+  --shadow-md: 0px 2px 0px 0px hsl(42 75% 42% / 0.07), 0px 2px 4px -1px hsl(28 35% 14% / 0.08);
+  --shadow-lg: 0px 4px 0px 0px hsl(42 75% 42% / 0.07), 0px 6px 12px -2px hsl(28 35% 14% / 0.10);
+  --shadow-xl: 0px 6px 0px 0px hsl(42 75% 42% / 0.08), 0px 12px 24px -4px hsl(28 35% 14% / 0.14);
+  --shadow-2xl: 0px 12px 32px -8px hsl(28 35% 14% / 0.20);
   
   --tracking-normal: 0em;
   --spacing: 0.25rem;
@@ -157,28 +162,27 @@
 }
 
 .dark {
-  /* Enforce light theme as much as possible as default, but define dark if needed */
-  --background: 345 30% 10%;
-  --foreground: 42 45% 90%;
-  --border: 345 30% 20%;
-  --card: 345 30% 12%;
-  --card-foreground: 42 45% 90%;
-  --card-border: 345 30% 20%;
-  --popover: 345 30% 12%;
-  --popover-foreground: 42 45% 90%;
-  --popover-border: 345 30% 20%;
-  --primary: 45 60% 50%;
-  --primary-foreground: 345 50% 15%;
-  --secondary: 350 40% 30%;
-  --secondary-foreground: 42 45% 90%;
-  --muted: 345 20% 15%;
-  --muted-foreground: 42 30% 70%;
-  --accent: 345 40% 20%;
-  --accent-foreground: 45 60% 80%;
-  --destructive: 0 60% 40%;
-  --destructive-foreground: 42 45% 96%;
-  --input: 345 30% 25%;
-  --ring: 45 60% 50%;
+  --background: 28 25% 8%;
+  --foreground: 42 50% 92%;
+  --border: 28 20% 18%;
+  --card: 28 25% 11%;
+  --card-foreground: 42 50% 92%;
+  --card-border: 28 20% 18%;
+  --popover: 28 25% 11%;
+  --popover-foreground: 42 50% 92%;
+  --popover-border: 28 20% 18%;
+  --primary: 45 80% 55%;
+  --primary-foreground: 28 35% 12%;
+  --secondary: 345 50% 32%;
+  --secondary-foreground: 42 50% 92%;
+  --muted: 28 20% 16%;
+  --muted-foreground: 42 30% 72%;
+  --accent: 28 30% 22%;
+  --accent-foreground: 45 80% 75%;
+  --destructive: 0 60% 45%;
+  --destructive-foreground: 42 50% 96%;
+  --input: 28 20% 22%;
+  --ring: 45 80% 55%;
 }
 
 @layer base {

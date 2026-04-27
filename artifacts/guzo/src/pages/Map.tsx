@@ -5,7 +5,7 @@ import L from "leaflet";
 import { useListChurches, getListChurchesQueryKey } from "@workspace/api-client-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
-import { Search, MapPin, List, Map as MapIcon, Globe2 } from "lucide-react";
+import { Search, MapPin, List, Map as MapIcon, Globe2, Clock, User, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -138,22 +138,39 @@ export function Map() {
                 position={[church.latitude, church.longitude]}
               >
                 <Popup className="rounded-xl overflow-hidden shadow-xl border-0 p-0 m-0">
-                  <div className="w-[210px] flex flex-col p-1">
+                  <div className="w-[240px] flex flex-col p-1" data-testid={`popup-church-${church.id}`}>
                     <img
                       src={church.imageUrl || "https://placehold.co/400x200"}
-                      className="w-full h-24 object-cover rounded-t-lg"
+                      className="w-full h-28 object-cover rounded-t-lg"
                       alt={church.name}
                     />
-                    <div className="p-3">
+                    <div className="p-3 space-y-2">
                       <h3 className="font-bold text-sm leading-tight text-foreground font-serif">
                         {church.name}
                       </h3>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {church.city}, {church.country}
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <MapPin className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{church.city}, {church.country}</span>
                       </p>
+                      {church.priest && (
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                          <User className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{church.priest}</span>
+                        </p>
+                      )}
+                      {church.liturgyTimes && (
+                        <p className="text-[11px] text-muted-foreground flex items-start gap-1">
+                          <Clock className="h-3 w-3 shrink-0 mt-0.5" />
+                          <span className="line-clamp-2">{church.liturgyTimes}</span>
+                        </p>
+                      )}
                       <Link href={`/churches/${church.id}`}>
-                        <span className="text-xs font-semibold text-primary mt-2 inline-flex items-center gap-1 cursor-pointer hover:underline">
-                          {t("nav.viewAll")} →
+                        <span
+                          className="block text-xs font-semibold text-primary-foreground mt-2 px-3 py-1.5 rounded-full text-center cursor-pointer"
+                          style={{ background: "var(--gold-gradient)" }}
+                          data-testid={`link-church-detail-${church.id}`}
+                        >
+                          {t("map.viewDetails", { defaultValue: "View Church" })} →
                         </span>
                       </Link>
                     </div>
@@ -198,12 +215,18 @@ export function Map() {
                     <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" /> {church.city}, {church.country}
                     </div>
-                    {church.address && (
-                      <div className="text-[10px] text-muted-foreground mt-1 line-clamp-1">
-                        {church.address}
+                    {church.priest && (
+                      <div className="text-[10px] text-muted-foreground mt-0.5 truncate flex items-center gap-1">
+                        <User className="h-3 w-3" /> {church.priest}
+                      </div>
+                    )}
+                    {church.liturgyTimes && (
+                      <div className="text-[10px] text-muted-foreground mt-0.5 truncate flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {church.liturgyTimes}
                       </div>
                     )}
                   </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground self-center shrink-0" />
                 </div>
               </Link>
             ))

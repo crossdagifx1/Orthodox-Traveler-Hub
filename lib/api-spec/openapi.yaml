@@ -17,6 +17,7 @@ tags:
   - name: admin
   - name: auth
   - name: stats
+  - name: qa
 paths:
   /healthz:
     get:
@@ -731,6 +732,281 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/SystemSetting" }
 
+  /qa/quizzes:
+    get:
+      operationId: qaListQuizzes
+      tags: [qa]
+      parameters:
+        - { in: query, name: q, schema: { type: string } }
+        - { in: query, name: category, schema: { type: string } }
+        - { in: query, name: difficulty, schema: { type: string } }
+        - { in: query, name: status, schema: { type: string } }
+        - { in: query, name: limit, schema: { type: integer } }
+      responses:
+        "200":
+          description: List of quizzes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Quiz" }
+    post:
+      operationId: qaCreateQuiz
+      tags: [qa]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateQuizBody" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quiz" }
+
+  /qa/quizzes/by-code/{code}:
+    get:
+      operationId: qaGetQuizByCode
+      tags: [qa]
+      parameters:
+        - { in: path, name: code, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Quiz
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quiz" }
+
+  /qa/quizzes/{id}:
+    get:
+      operationId: qaGetQuiz
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Quiz with questions
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuizDetail" }
+    patch:
+      operationId: qaUpdateQuiz
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateQuizBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quiz" }
+    delete:
+      operationId: qaDeleteQuiz
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /qa/quizzes/{id}/questions:
+    post:
+      operationId: qaCreateQuestion
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateQuestionBody" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuizQuestion" }
+
+  /qa/questions/{id}:
+    patch:
+      operationId: qaUpdateQuestion
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateQuestionBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuizQuestion" }
+    delete:
+      operationId: qaDeleteQuestion
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /qa/quizzes/{id}/start:
+    post:
+      operationId: qaStartAttempt
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Attempt started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AttemptStart" }
+
+  /qa/attempts/{id}/answer:
+    post:
+      operationId: qaSubmitAnswer
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubmitAnswerBody" }
+      responses:
+        "200":
+          description: Answer scored
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubmitAnswerResult" }
+
+  /qa/attempts/{id}/finish:
+    post:
+      operationId: qaFinishAttempt
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Finished
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuizAttempt" }
+
+  /qa/attempts/{id}:
+    get:
+      operationId: qaGetAttempt
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Attempt result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AttemptResult" }
+
+  /qa/me/attempts:
+    get:
+      operationId: qaListMyAttempts
+      tags: [qa]
+      parameters:
+        - { in: query, name: limit, schema: { type: integer } }
+      responses:
+        "200":
+          description: My attempts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/QuizAttempt" }
+
+  /qa/leaderboard:
+    get:
+      operationId: qaLeaderboard
+      tags: [qa]
+      parameters:
+        - { in: query, name: window, schema: { type: string, enum: [today, week, month, all] } }
+        - { in: query, name: limit, schema: { type: integer } }
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Leaderboard" }
+
+  /qa/challenges:
+    get:
+      operationId: qaListChallenges
+      tags: [qa]
+      responses:
+        "200":
+          description: Active challenges
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/QuizChallenge" }
+    post:
+      operationId: qaCreateChallenge
+      tags: [qa]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateChallengeBody" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuizChallenge" }
+
+  /qa/challenges/{id}:
+    patch:
+      operationId: qaUpdateChallenge
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateChallengeBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuizChallenge" }
+    delete:
+      operationId: qaDeleteChallenge
+      tags: [qa]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
 components:
   schemas:
     HealthStatus:
@@ -1115,3 +1391,259 @@ components:
         value: {}
         description: { type: string }
       required: [key, value]
+
+    Quiz:
+      type: object
+      properties:
+        id: { type: string }
+        code: { type: string }
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        difficulty: { type: string, enum: [easy, medium, hard, expert] }
+        language: { type: string }
+        timeLimitSeconds: { type: integer }
+        pointsTotal: { type: integer }
+        attemptsCount: { type: integer }
+        coverUrl: { type: string }
+        authorId:
+          oneOf:
+            - { type: integer }
+            - { type: "null" }
+        authorName: { type: string }
+        isPublic: { type: boolean }
+        status: { type: string, enum: [draft, published, archived] }
+        tags:
+          type: array
+          items: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required:
+        [
+          id, code, title, description, category, difficulty, language,
+          timeLimitSeconds, pointsTotal, attemptsCount, coverUrl, authorName,
+          isPublic, status, tags, createdAt, updatedAt,
+        ]
+
+    QuizQuestion:
+      type: object
+      properties:
+        id: { type: string }
+        quizId: { type: string }
+        type: { type: string, enum: [mcq, multi, truefalse, short, fill, ordering] }
+        prompt: { type: string }
+        options: {}
+        correctAnswer: {}
+        explanation: { type: string }
+        imageUrl: { type: string }
+        points: { type: integer }
+        position: { type: integer }
+      required: [id, quizId, type, prompt, options, points, position]
+
+    QuizDetail:
+      type: object
+      properties:
+        quiz: { $ref: "#/components/schemas/Quiz" }
+        questions:
+          type: array
+          items: { $ref: "#/components/schemas/QuizQuestion" }
+      required: [quiz, questions]
+
+    CreateQuizBody:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        difficulty: { type: string, enum: [easy, medium, hard, expert] }
+        language: { type: string }
+        timeLimitSeconds: { type: integer }
+        coverUrl: { type: string }
+        isPublic: { type: boolean }
+        status: { type: string, enum: [draft, published, archived] }
+        tags:
+          type: array
+          items: { type: string }
+      required: [title]
+
+    UpdateQuizBody:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        difficulty: { type: string, enum: [easy, medium, hard, expert] }
+        language: { type: string }
+        timeLimitSeconds: { type: integer }
+        coverUrl: { type: string }
+        isPublic: { type: boolean }
+        status: { type: string, enum: [draft, published, archived] }
+        tags:
+          type: array
+          items: { type: string }
+
+    CreateQuestionBody:
+      type: object
+      properties:
+        type: { type: string, enum: [mcq, multi, truefalse, short, fill, ordering] }
+        prompt: { type: string }
+        options: {}
+        correctAnswer: {}
+        explanation: { type: string }
+        imageUrl: { type: string }
+        points: { type: integer }
+        position: { type: integer }
+      required: [type, prompt]
+
+    UpdateQuestionBody:
+      type: object
+      properties:
+        type: { type: string, enum: [mcq, multi, truefalse, short, fill, ordering] }
+        prompt: { type: string }
+        options: {}
+        correctAnswer: {}
+        explanation: { type: string }
+        imageUrl: { type: string }
+        points: { type: integer }
+        position: { type: integer }
+
+    QuizAttempt:
+      type: object
+      properties:
+        id: { type: string }
+        quizId: { type: string }
+        userId: { type: integer }
+        userName: { type: string }
+        score: { type: integer }
+        totalPoints: { type: integer }
+        correctCount: { type: integer }
+        totalCount: { type: integer }
+        durationMs: { type: integer }
+        status: { type: string, enum: [in_progress, completed, abandoned] }
+        startedAt: { type: string, format: date-time }
+        finishedAt:
+          oneOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+      required:
+        [id, quizId, userId, userName, score, totalPoints, correctCount, totalCount, durationMs, status, startedAt]
+
+    QuizAnswer:
+      type: object
+      properties:
+        id: { type: string }
+        attemptId: { type: string }
+        questionId: { type: string }
+        response: {}
+        isCorrect: { type: boolean }
+        pointsEarned: { type: integer }
+        timeSpentMs: { type: integer }
+        answeredAt: { type: string, format: date-time }
+      required: [id, attemptId, questionId, isCorrect, pointsEarned, timeSpentMs, answeredAt]
+
+    AttemptStart:
+      type: object
+      properties:
+        attempt: { $ref: "#/components/schemas/QuizAttempt" }
+        quiz: { $ref: "#/components/schemas/Quiz" }
+        questions:
+          type: array
+          items: { $ref: "#/components/schemas/QuizQuestion" }
+      required: [attempt, quiz, questions]
+
+    SubmitAnswerBody:
+      type: object
+      properties:
+        questionId: { type: integer }
+        response: {}
+        timeSpentMs: { type: integer }
+      required: [questionId]
+
+    SubmitAnswerResult:
+      type: object
+      properties:
+        answer: { $ref: "#/components/schemas/QuizAnswer" }
+        correctAnswer: {}
+        explanation: { type: string }
+        score: { type: integer }
+        correctCount: { type: integer }
+      required: [answer, score, correctCount]
+
+    AttemptResult:
+      type: object
+      properties:
+        attempt: { $ref: "#/components/schemas/QuizAttempt" }
+        quiz:
+          oneOf:
+            - { $ref: "#/components/schemas/Quiz" }
+            - { type: "null" }
+        questions:
+          type: array
+          items: { $ref: "#/components/schemas/QuizQuestion" }
+        answers:
+          type: array
+          items: { $ref: "#/components/schemas/QuizAnswer" }
+      required: [attempt, questions, answers]
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank: { type: integer }
+        userId: { type: integer }
+        userName: { type: string }
+        points: { type: integer }
+        attempts: { type: integer }
+        bestScore: { type: integer }
+        accuracy: { type: integer }
+      required: [rank, userId, userName, points, attempts, bestScore, accuracy]
+
+    Leaderboard:
+      type: object
+      properties:
+        window: { type: string }
+        entries:
+          type: array
+          items: { $ref: "#/components/schemas/LeaderboardEntry" }
+      required: [window, entries]
+
+    QuizChallenge:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        type: { type: string, enum: [weekly, monthly, flash, custom] }
+        quizId: { type: string }
+        prize: { type: string }
+        bannerUrl: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+      required:
+        [id, title, description, type, quizId, prize, bannerUrl, startsAt, endsAt, status, createdAt]
+
+    CreateChallengeBody:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        type: { type: string, enum: [weekly, monthly, flash, custom] }
+        quizId: { type: integer }
+        prize: { type: string }
+        bannerUrl: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+      required: [quizId]
+
+    UpdateChallengeBody:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        type: { type: string, enum: [weekly, monthly, flash, custom] }
+        prize: { type: string }
+        bannerUrl: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        status: { type: string }

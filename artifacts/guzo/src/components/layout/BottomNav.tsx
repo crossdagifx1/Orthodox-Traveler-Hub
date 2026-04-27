@@ -1,14 +1,14 @@
 import { Link, useLocation } from "wouter";
-import { Home, Map as MapIcon, Music, ShoppingBag, MapPin } from "lucide-react";
+import { Home, Map as MapIcon, GraduationCap, ShoppingBag, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 const TABS = [
   { path: "/", icon: Home, key: "home" as const },
   { path: "/destinations", icon: MapPin, key: "destinations" as const },
+  { path: "/learn", icon: GraduationCap, key: "learn" as const },
   { path: "/map", icon: MapIcon, key: "map" as const },
   { path: "/marketplace", icon: ShoppingBag, key: "market" as const },
-  { path: "/mezmurs", icon: Music, key: "mezmurs" as const },
 ];
 
 export function BottomNav() {

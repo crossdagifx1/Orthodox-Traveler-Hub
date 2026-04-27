@@ -14,6 +14,7 @@ import {
   Activity,
   Settings as SettingsIcon,
   Crown,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/AuthProvider";
@@ -39,6 +40,8 @@ const TILES: Tile[] = [
   { titleKey: "nav.market", descKey: "admin.manageMarket", icon: ShoppingBag, path: "/admin/marketplace", minRole: "admin" },
   { titleKey: "nav.mezmurs", descKey: "admin.manageMezmurs", icon: Music, path: "/admin/mezmurs", minRole: "admin" },
   { titleKey: "nav.news", descKey: "admin.manageNews", icon: FileText, path: "/admin/news", minRole: "admin" },
+  // Q&A — open to teachers (moderator+)
+  { titleKey: "admin.qa.title", descKey: "admin.qa.subtitle", icon: GraduationCap, path: "/admin/qa", minRole: "moderator", accentClass: "border-primary/40" },
   // Operations
   { titleKey: "admin.users.title", descKey: "admin.users.subtitle", icon: Users, path: "/admin/users", minRole: "admin" },
   { titleKey: "admin.audit.title", descKey: "admin.audit.subtitle", icon: ScrollText, path: "/admin/audit", minRole: "admin" },

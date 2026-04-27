@@ -21,15 +21,21 @@ import type {
   AdminListAuditParams,
   AdminListUsersParams,
   AdminUpdateUserBody,
+  AttemptResult,
+  AttemptStart,
   AuditLogEntry,
   Church,
+  CreateChallengeBody,
   CreateChurchBody,
   CreateDestinationBody,
   CreateMarketplaceItemBody,
   CreateMezmurBody,
   CreateNewsBody,
+  CreateQuestionBody,
+  CreateQuizBody,
   Destination,
   HealthStatus,
+  Leaderboard,
   ListChurchesParams,
   ListDestinationsParams,
   ListMarketplaceItemsParams,
@@ -42,13 +48,26 @@ import type {
   Mezmur,
   NewsPost,
   OkResponse,
+  QaLeaderboardParams,
+  QaListMyAttemptsParams,
+  QaListQuizzesParams,
+  Quiz,
+  QuizAttempt,
+  QuizChallenge,
+  QuizDetail,
+  QuizQuestion,
   StatsOverview,
+  SubmitAnswerBody,
+  SubmitAnswerResult,
   SystemSetting,
+  UpdateChallengeBody,
   UpdateChurchBody,
   UpdateDestinationBody,
   UpdateMarketplaceItemBody,
   UpdateMezmurBody,
   UpdateNewsBody,
+  UpdateQuestionBody,
+  UpdateQuizBody,
   UpdateSystemSettingBody,
   User,
 } from "./api.schemas";
@@ -3524,4 +3543,1529 @@ export const useAdminUpdateSystemSetting = <
   TContext
 > => {
   return useMutation(getAdminUpdateSystemSettingMutationOptions(options));
+};
+
+export const getQaListQuizzesUrl = (params?: QaListQuizzesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/qa/quizzes?${stringifiedParams}`
+    : `/api/qa/quizzes`;
+};
+
+export const qaListQuizzes = async (
+  params?: QaListQuizzesParams,
+  options?: RequestInit,
+): Promise<Quiz[]> => {
+  return customFetch<Quiz[]>(getQaListQuizzesUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getQaListQuizzesQueryKey = (params?: QaListQuizzesParams) => {
+  return [`/api/qa/quizzes`, ...(params ? [params] : [])] as const;
+};
+
+export const getQaListQuizzesQueryOptions = <
+  TData = Awaited<ReturnType<typeof qaListQuizzes>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: QaListQuizzesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaListQuizzes>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getQaListQuizzesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof qaListQuizzes>>> = ({
+    signal,
+  }) => qaListQuizzes(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof qaListQuizzes>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type QaListQuizzesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof qaListQuizzes>>
+>;
+export type QaListQuizzesQueryError = ErrorType<unknown>;
+
+export function useQaListQuizzes<
+  TData = Awaited<ReturnType<typeof qaListQuizzes>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: QaListQuizzesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaListQuizzes>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getQaListQuizzesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const getQaCreateQuizUrl = () => {
+  return `/api/qa/quizzes`;
+};
+
+export const qaCreateQuiz = async (
+  createQuizBody: CreateQuizBody,
+  options?: RequestInit,
+): Promise<Quiz> => {
+  return customFetch<Quiz>(getQaCreateQuizUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createQuizBody),
+  });
+};
+
+export const getQaCreateQuizMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaCreateQuiz>>,
+    TError,
+    { data: BodyType<CreateQuizBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaCreateQuiz>>,
+  TError,
+  { data: BodyType<CreateQuizBody> },
+  TContext
+> => {
+  const mutationKey = ["qaCreateQuiz"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaCreateQuiz>>,
+    { data: BodyType<CreateQuizBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return qaCreateQuiz(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaCreateQuizMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaCreateQuiz>>
+>;
+export type QaCreateQuizMutationBody = BodyType<CreateQuizBody>;
+export type QaCreateQuizMutationError = ErrorType<unknown>;
+
+export const useQaCreateQuiz = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaCreateQuiz>>,
+    TError,
+    { data: BodyType<CreateQuizBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaCreateQuiz>>,
+  TError,
+  { data: BodyType<CreateQuizBody> },
+  TContext
+> => {
+  return useMutation(getQaCreateQuizMutationOptions(options));
+};
+
+export const getQaGetQuizByCodeUrl = (code: string) => {
+  return `/api/qa/quizzes/by-code/${code}`;
+};
+
+export const qaGetQuizByCode = async (
+  code: string,
+  options?: RequestInit,
+): Promise<Quiz> => {
+  return customFetch<Quiz>(getQaGetQuizByCodeUrl(code), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getQaGetQuizByCodeQueryKey = (code: string) => {
+  return [`/api/qa/quizzes/by-code/${code}`] as const;
+};
+
+export const getQaGetQuizByCodeQueryOptions = <
+  TData = Awaited<ReturnType<typeof qaGetQuizByCode>>,
+  TError = ErrorType<unknown>,
+>(
+  code: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaGetQuizByCode>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getQaGetQuizByCodeQueryKey(code);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof qaGetQuizByCode>>> = ({
+    signal,
+  }) => qaGetQuizByCode(code, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!code,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof qaGetQuizByCode>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type QaGetQuizByCodeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof qaGetQuizByCode>>
+>;
+export type QaGetQuizByCodeQueryError = ErrorType<unknown>;
+
+export function useQaGetQuizByCode<
+  TData = Awaited<ReturnType<typeof qaGetQuizByCode>>,
+  TError = ErrorType<unknown>,
+>(
+  code: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaGetQuizByCode>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getQaGetQuizByCodeQueryOptions(code, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const getQaGetQuizUrl = (id: string) => {
+  return `/api/qa/quizzes/${id}`;
+};
+
+export const qaGetQuiz = async (
+  id: string,
+  options?: RequestInit,
+): Promise<QuizDetail> => {
+  return customFetch<QuizDetail>(getQaGetQuizUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getQaGetQuizQueryKey = (id: string) => {
+  return [`/api/qa/quizzes/${id}`] as const;
+};
+
+export const getQaGetQuizQueryOptions = <
+  TData = Awaited<ReturnType<typeof qaGetQuiz>>,
+  TError = ErrorType<unknown>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaGetQuiz>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getQaGetQuizQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof qaGetQuiz>>> = ({
+    signal,
+  }) => qaGetQuiz(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof qaGetQuiz>>, TError, TData> & {
+    queryKey: QueryKey;
+  };
+};
+
+export type QaGetQuizQueryResult = NonNullable<
+  Awaited<ReturnType<typeof qaGetQuiz>>
+>;
+export type QaGetQuizQueryError = ErrorType<unknown>;
+
+export function useQaGetQuiz<
+  TData = Awaited<ReturnType<typeof qaGetQuiz>>,
+  TError = ErrorType<unknown>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaGetQuiz>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getQaGetQuizQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const getQaUpdateQuizUrl = (id: string) => {
+  return `/api/qa/quizzes/${id}`;
+};
+
+export const qaUpdateQuiz = async (
+  id: string,
+  updateQuizBody: UpdateQuizBody,
+  options?: RequestInit,
+): Promise<Quiz> => {
+  return customFetch<Quiz>(getQaUpdateQuizUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateQuizBody),
+  });
+};
+
+export const getQaUpdateQuizMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaUpdateQuiz>>,
+    TError,
+    { id: string; data: BodyType<UpdateQuizBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaUpdateQuiz>>,
+  TError,
+  { id: string; data: BodyType<UpdateQuizBody> },
+  TContext
+> => {
+  const mutationKey = ["qaUpdateQuiz"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaUpdateQuiz>>,
+    { id: string; data: BodyType<UpdateQuizBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return qaUpdateQuiz(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaUpdateQuizMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaUpdateQuiz>>
+>;
+export type QaUpdateQuizMutationBody = BodyType<UpdateQuizBody>;
+export type QaUpdateQuizMutationError = ErrorType<unknown>;
+
+export const useQaUpdateQuiz = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaUpdateQuiz>>,
+    TError,
+    { id: string; data: BodyType<UpdateQuizBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaUpdateQuiz>>,
+  TError,
+  { id: string; data: BodyType<UpdateQuizBody> },
+  TContext
+> => {
+  return useMutation(getQaUpdateQuizMutationOptions(options));
+};
+
+export const getQaDeleteQuizUrl = (id: string) => {
+  return `/api/qa/quizzes/${id}`;
+};
+
+export const qaDeleteQuiz = async (
+  id: string,
+  options?: RequestInit,
+): Promise<OkResponse> => {
+  return customFetch<OkResponse>(getQaDeleteQuizUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getQaDeleteQuizMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaDeleteQuiz>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaDeleteQuiz>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["qaDeleteQuiz"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaDeleteQuiz>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return qaDeleteQuiz(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaDeleteQuizMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaDeleteQuiz>>
+>;
+
+export type QaDeleteQuizMutationError = ErrorType<unknown>;
+
+export const useQaDeleteQuiz = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaDeleteQuiz>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaDeleteQuiz>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getQaDeleteQuizMutationOptions(options));
+};
+
+export const getQaCreateQuestionUrl = (id: string) => {
+  return `/api/qa/quizzes/${id}/questions`;
+};
+
+export const qaCreateQuestion = async (
+  id: string,
+  createQuestionBody: CreateQuestionBody,
+  options?: RequestInit,
+): Promise<QuizQuestion> => {
+  return customFetch<QuizQuestion>(getQaCreateQuestionUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createQuestionBody),
+  });
+};
+
+export const getQaCreateQuestionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaCreateQuestion>>,
+    TError,
+    { id: string; data: BodyType<CreateQuestionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaCreateQuestion>>,
+  TError,
+  { id: string; data: BodyType<CreateQuestionBody> },
+  TContext
+> => {
+  const mutationKey = ["qaCreateQuestion"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaCreateQuestion>>,
+    { id: string; data: BodyType<CreateQuestionBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return qaCreateQuestion(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaCreateQuestionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaCreateQuestion>>
+>;
+export type QaCreateQuestionMutationBody = BodyType<CreateQuestionBody>;
+export type QaCreateQuestionMutationError = ErrorType<unknown>;
+
+export const useQaCreateQuestion = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaCreateQuestion>>,
+    TError,
+    { id: string; data: BodyType<CreateQuestionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaCreateQuestion>>,
+  TError,
+  { id: string; data: BodyType<CreateQuestionBody> },
+  TContext
+> => {
+  return useMutation(getQaCreateQuestionMutationOptions(options));
+};
+
+export const getQaUpdateQuestionUrl = (id: string) => {
+  return `/api/qa/questions/${id}`;
+};
+
+export const qaUpdateQuestion = async (
+  id: string,
+  updateQuestionBody: UpdateQuestionBody,
+  options?: RequestInit,
+): Promise<QuizQuestion> => {
+  return customFetch<QuizQuestion>(getQaUpdateQuestionUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateQuestionBody),
+  });
+};
+
+export const getQaUpdateQuestionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaUpdateQuestion>>,
+    TError,
+    { id: string; data: BodyType<UpdateQuestionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaUpdateQuestion>>,
+  TError,
+  { id: string; data: BodyType<UpdateQuestionBody> },
+  TContext
+> => {
+  const mutationKey = ["qaUpdateQuestion"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaUpdateQuestion>>,
+    { id: string; data: BodyType<UpdateQuestionBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return qaUpdateQuestion(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaUpdateQuestionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaUpdateQuestion>>
+>;
+export type QaUpdateQuestionMutationBody = BodyType<UpdateQuestionBody>;
+export type QaUpdateQuestionMutationError = ErrorType<unknown>;
+
+export const useQaUpdateQuestion = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaUpdateQuestion>>,
+    TError,
+    { id: string; data: BodyType<UpdateQuestionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaUpdateQuestion>>,
+  TError,
+  { id: string; data: BodyType<UpdateQuestionBody> },
+  TContext
+> => {
+  return useMutation(getQaUpdateQuestionMutationOptions(options));
+};
+
+export const getQaDeleteQuestionUrl = (id: string) => {
+  return `/api/qa/questions/${id}`;
+};
+
+export const qaDeleteQuestion = async (
+  id: string,
+  options?: RequestInit,
+): Promise<OkResponse> => {
+  return customFetch<OkResponse>(getQaDeleteQuestionUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getQaDeleteQuestionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaDeleteQuestion>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaDeleteQuestion>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["qaDeleteQuestion"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaDeleteQuestion>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return qaDeleteQuestion(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaDeleteQuestionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaDeleteQuestion>>
+>;
+
+export type QaDeleteQuestionMutationError = ErrorType<unknown>;
+
+export const useQaDeleteQuestion = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaDeleteQuestion>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaDeleteQuestion>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getQaDeleteQuestionMutationOptions(options));
+};
+
+export const getQaStartAttemptUrl = (id: string) => {
+  return `/api/qa/quizzes/${id}/start`;
+};
+
+export const qaStartAttempt = async (
+  id: string,
+  options?: RequestInit,
+): Promise<AttemptStart> => {
+  return customFetch<AttemptStart>(getQaStartAttemptUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getQaStartAttemptMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaStartAttempt>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaStartAttempt>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["qaStartAttempt"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaStartAttempt>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return qaStartAttempt(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaStartAttemptMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaStartAttempt>>
+>;
+
+export type QaStartAttemptMutationError = ErrorType<unknown>;
+
+export const useQaStartAttempt = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaStartAttempt>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaStartAttempt>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getQaStartAttemptMutationOptions(options));
+};
+
+export const getQaSubmitAnswerUrl = (id: string) => {
+  return `/api/qa/attempts/${id}/answer`;
+};
+
+export const qaSubmitAnswer = async (
+  id: string,
+  submitAnswerBody: SubmitAnswerBody,
+  options?: RequestInit,
+): Promise<SubmitAnswerResult> => {
+  return customFetch<SubmitAnswerResult>(getQaSubmitAnswerUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(submitAnswerBody),
+  });
+};
+
+export const getQaSubmitAnswerMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaSubmitAnswer>>,
+    TError,
+    { id: string; data: BodyType<SubmitAnswerBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaSubmitAnswer>>,
+  TError,
+  { id: string; data: BodyType<SubmitAnswerBody> },
+  TContext
+> => {
+  const mutationKey = ["qaSubmitAnswer"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaSubmitAnswer>>,
+    { id: string; data: BodyType<SubmitAnswerBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return qaSubmitAnswer(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaSubmitAnswerMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaSubmitAnswer>>
+>;
+export type QaSubmitAnswerMutationBody = BodyType<SubmitAnswerBody>;
+export type QaSubmitAnswerMutationError = ErrorType<unknown>;
+
+export const useQaSubmitAnswer = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaSubmitAnswer>>,
+    TError,
+    { id: string; data: BodyType<SubmitAnswerBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaSubmitAnswer>>,
+  TError,
+  { id: string; data: BodyType<SubmitAnswerBody> },
+  TContext
+> => {
+  return useMutation(getQaSubmitAnswerMutationOptions(options));
+};
+
+export const getQaFinishAttemptUrl = (id: string) => {
+  return `/api/qa/attempts/${id}/finish`;
+};
+
+export const qaFinishAttempt = async (
+  id: string,
+  options?: RequestInit,
+): Promise<QuizAttempt> => {
+  return customFetch<QuizAttempt>(getQaFinishAttemptUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getQaFinishAttemptMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaFinishAttempt>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaFinishAttempt>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["qaFinishAttempt"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaFinishAttempt>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return qaFinishAttempt(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaFinishAttemptMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaFinishAttempt>>
+>;
+
+export type QaFinishAttemptMutationError = ErrorType<unknown>;
+
+export const useQaFinishAttempt = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaFinishAttempt>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaFinishAttempt>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getQaFinishAttemptMutationOptions(options));
+};
+
+export const getQaGetAttemptUrl = (id: string) => {
+  return `/api/qa/attempts/${id}`;
+};
+
+export const qaGetAttempt = async (
+  id: string,
+  options?: RequestInit,
+): Promise<AttemptResult> => {
+  return customFetch<AttemptResult>(getQaGetAttemptUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getQaGetAttemptQueryKey = (id: string) => {
+  return [`/api/qa/attempts/${id}`] as const;
+};
+
+export const getQaGetAttemptQueryOptions = <
+  TData = Awaited<ReturnType<typeof qaGetAttempt>>,
+  TError = ErrorType<unknown>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaGetAttempt>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getQaGetAttemptQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof qaGetAttempt>>> = ({
+    signal,
+  }) => qaGetAttempt(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof qaGetAttempt>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type QaGetAttemptQueryResult = NonNullable<
+  Awaited<ReturnType<typeof qaGetAttempt>>
+>;
+export type QaGetAttemptQueryError = ErrorType<unknown>;
+
+export function useQaGetAttempt<
+  TData = Awaited<ReturnType<typeof qaGetAttempt>>,
+  TError = ErrorType<unknown>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaGetAttempt>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getQaGetAttemptQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const getQaListMyAttemptsUrl = (params?: QaListMyAttemptsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/qa/me/attempts?${stringifiedParams}`
+    : `/api/qa/me/attempts`;
+};
+
+export const qaListMyAttempts = async (
+  params?: QaListMyAttemptsParams,
+  options?: RequestInit,
+): Promise<QuizAttempt[]> => {
+  return customFetch<QuizAttempt[]>(getQaListMyAttemptsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getQaListMyAttemptsQueryKey = (
+  params?: QaListMyAttemptsParams,
+) => {
+  return [`/api/qa/me/attempts`, ...(params ? [params] : [])] as const;
+};
+
+export const getQaListMyAttemptsQueryOptions = <
+  TData = Awaited<ReturnType<typeof qaListMyAttempts>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: QaListMyAttemptsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaListMyAttempts>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getQaListMyAttemptsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof qaListMyAttempts>>
+  > = ({ signal }) => qaListMyAttempts(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof qaListMyAttempts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type QaListMyAttemptsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof qaListMyAttempts>>
+>;
+export type QaListMyAttemptsQueryError = ErrorType<unknown>;
+
+export function useQaListMyAttempts<
+  TData = Awaited<ReturnType<typeof qaListMyAttempts>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: QaListMyAttemptsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaListMyAttempts>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getQaListMyAttemptsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const getQaLeaderboardUrl = (params?: QaLeaderboardParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/qa/leaderboard?${stringifiedParams}`
+    : `/api/qa/leaderboard`;
+};
+
+export const qaLeaderboard = async (
+  params?: QaLeaderboardParams,
+  options?: RequestInit,
+): Promise<Leaderboard> => {
+  return customFetch<Leaderboard>(getQaLeaderboardUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getQaLeaderboardQueryKey = (params?: QaLeaderboardParams) => {
+  return [`/api/qa/leaderboard`, ...(params ? [params] : [])] as const;
+};
+
+export const getQaLeaderboardQueryOptions = <
+  TData = Awaited<ReturnType<typeof qaLeaderboard>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: QaLeaderboardParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaLeaderboard>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getQaLeaderboardQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof qaLeaderboard>>> = ({
+    signal,
+  }) => qaLeaderboard(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof qaLeaderboard>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type QaLeaderboardQueryResult = NonNullable<
+  Awaited<ReturnType<typeof qaLeaderboard>>
+>;
+export type QaLeaderboardQueryError = ErrorType<unknown>;
+
+export function useQaLeaderboard<
+  TData = Awaited<ReturnType<typeof qaLeaderboard>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: QaLeaderboardParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof qaLeaderboard>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getQaLeaderboardQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const getQaListChallengesUrl = () => {
+  return `/api/qa/challenges`;
+};
+
+export const qaListChallenges = async (
+  options?: RequestInit,
+): Promise<QuizChallenge[]> => {
+  return customFetch<QuizChallenge[]>(getQaListChallengesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getQaListChallengesQueryKey = () => {
+  return [`/api/qa/challenges`] as const;
+};
+
+export const getQaListChallengesQueryOptions = <
+  TData = Awaited<ReturnType<typeof qaListChallenges>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof qaListChallenges>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getQaListChallengesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof qaListChallenges>>
+  > = ({ signal }) => qaListChallenges({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof qaListChallenges>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type QaListChallengesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof qaListChallenges>>
+>;
+export type QaListChallengesQueryError = ErrorType<unknown>;
+
+export function useQaListChallenges<
+  TData = Awaited<ReturnType<typeof qaListChallenges>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof qaListChallenges>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getQaListChallengesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const getQaCreateChallengeUrl = () => {
+  return `/api/qa/challenges`;
+};
+
+export const qaCreateChallenge = async (
+  createChallengeBody: CreateChallengeBody,
+  options?: RequestInit,
+): Promise<QuizChallenge> => {
+  return customFetch<QuizChallenge>(getQaCreateChallengeUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createChallengeBody),
+  });
+};
+
+export const getQaCreateChallengeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaCreateChallenge>>,
+    TError,
+    { data: BodyType<CreateChallengeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaCreateChallenge>>,
+  TError,
+  { data: BodyType<CreateChallengeBody> },
+  TContext
+> => {
+  const mutationKey = ["qaCreateChallenge"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaCreateChallenge>>,
+    { data: BodyType<CreateChallengeBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return qaCreateChallenge(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaCreateChallengeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaCreateChallenge>>
+>;
+export type QaCreateChallengeMutationBody = BodyType<CreateChallengeBody>;
+export type QaCreateChallengeMutationError = ErrorType<unknown>;
+
+export const useQaCreateChallenge = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaCreateChallenge>>,
+    TError,
+    { data: BodyType<CreateChallengeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaCreateChallenge>>,
+  TError,
+  { data: BodyType<CreateChallengeBody> },
+  TContext
+> => {
+  return useMutation(getQaCreateChallengeMutationOptions(options));
+};
+
+export const getQaUpdateChallengeUrl = (id: string) => {
+  return `/api/qa/challenges/${id}`;
+};
+
+export const qaUpdateChallenge = async (
+  id: string,
+  updateChallengeBody: UpdateChallengeBody,
+  options?: RequestInit,
+): Promise<QuizChallenge> => {
+  return customFetch<QuizChallenge>(getQaUpdateChallengeUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateChallengeBody),
+  });
+};
+
+export const getQaUpdateChallengeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaUpdateChallenge>>,
+    TError,
+    { id: string; data: BodyType<UpdateChallengeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaUpdateChallenge>>,
+  TError,
+  { id: string; data: BodyType<UpdateChallengeBody> },
+  TContext
+> => {
+  const mutationKey = ["qaUpdateChallenge"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaUpdateChallenge>>,
+    { id: string; data: BodyType<UpdateChallengeBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return qaUpdateChallenge(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaUpdateChallengeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaUpdateChallenge>>
+>;
+export type QaUpdateChallengeMutationBody = BodyType<UpdateChallengeBody>;
+export type QaUpdateChallengeMutationError = ErrorType<unknown>;
+
+export const useQaUpdateChallenge = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaUpdateChallenge>>,
+    TError,
+    { id: string; data: BodyType<UpdateChallengeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaUpdateChallenge>>,
+  TError,
+  { id: string; data: BodyType<UpdateChallengeBody> },
+  TContext
+> => {
+  return useMutation(getQaUpdateChallengeMutationOptions(options));
+};
+
+export const getQaDeleteChallengeUrl = (id: string) => {
+  return `/api/qa/challenges/${id}`;
+};
+
+export const qaDeleteChallenge = async (
+  id: string,
+  options?: RequestInit,
+): Promise<OkResponse> => {
+  return customFetch<OkResponse>(getQaDeleteChallengeUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getQaDeleteChallengeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaDeleteChallenge>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qaDeleteChallenge>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["qaDeleteChallenge"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qaDeleteChallenge>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return qaDeleteChallenge(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QaDeleteChallengeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qaDeleteChallenge>>
+>;
+
+export type QaDeleteChallengeMutationError = ErrorType<unknown>;
+
+export const useQaDeleteChallenge = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qaDeleteChallenge>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qaDeleteChallenge>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getQaDeleteChallengeMutationOptions(options));
 };

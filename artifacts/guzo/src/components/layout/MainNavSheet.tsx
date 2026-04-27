@@ -7,6 +7,8 @@ import {
   ShoppingBag,
   Music,
   Newspaper,
+  GraduationCap,
+  Trophy,
   Shield,
   LogIn,
   LogOut,
@@ -30,6 +32,8 @@ type NavItem = {
 const PRIMARY: NavItem[] = [
   { path: "/", icon: Home, key: "home", testId: "nav-home" },
   { path: "/destinations", icon: MapPin, key: "destinations", testId: "nav-destinations" },
+  { path: "/learn", icon: GraduationCap, key: "learn", testId: "nav-learn" },
+  { path: "/learn/leaderboard", icon: Trophy, key: "leaderboard", testId: "nav-leaderboard" },
   { path: "/map", icon: MapIcon, key: "map", testId: "nav-map" },
   { path: "/marketplace", icon: ShoppingBag, key: "market", testId: "nav-market" },
   { path: "/mezmurs", icon: Music, key: "mezmurs", testId: "nav-mezmurs" },

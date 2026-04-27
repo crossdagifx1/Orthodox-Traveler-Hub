@@ -10,6 +10,7 @@ A mobile-first web application for the Orthodox Christian community, with a spec
 - **Marketplace** — icons, crosses, vestments, books, liturgical goods
 - **Mezmurs** — spiritual hymns library with audio player and lyrics
 - **News** — articles, teachings, and announcements
+- **Learn (Q&A)** — quizzes with 6 question types (mcq / multi / true-false / short / fill / ordering), join-by-code, weekly+monthly+all-time leaderboards, challenges. Teachers/moderators author quizzes from `/admin/qa`.
 - **Admin Console** — separate management pages for each feature, gated by role
 
 ## Architecture

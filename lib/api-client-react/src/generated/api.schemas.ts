@@ -360,6 +360,328 @@ export interface UpdateSystemSettingBody {
   description?: string;
 }
 
+export type QuizDifficulty =
+  (typeof QuizDifficulty)[keyof typeof QuizDifficulty];
+
+export const QuizDifficulty = {
+  easy: "easy",
+  medium: "medium",
+  hard: "hard",
+  expert: "expert",
+} as const;
+
+export type QuizStatus = (typeof QuizStatus)[keyof typeof QuizStatus];
+
+export const QuizStatus = {
+  draft: "draft",
+  published: "published",
+  archived: "archived",
+} as const;
+
+export interface Quiz {
+  id: string;
+  code: string;
+  title: string;
+  description: string;
+  category: string;
+  difficulty: QuizDifficulty;
+  language: string;
+  timeLimitSeconds: number;
+  pointsTotal: number;
+  attemptsCount: number;
+  coverUrl: string;
+  authorId?: number | null;
+  authorName: string;
+  isPublic: boolean;
+  status: QuizStatus;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type QuizQuestionType =
+  (typeof QuizQuestionType)[keyof typeof QuizQuestionType];
+
+export const QuizQuestionType = {
+  mcq: "mcq",
+  multi: "multi",
+  truefalse: "truefalse",
+  short: "short",
+  fill: "fill",
+  ordering: "ordering",
+} as const;
+
+export interface QuizQuestion {
+  id: string;
+  quizId: string;
+  type: QuizQuestionType;
+  prompt: string;
+  options: unknown;
+  correctAnswer?: unknown;
+  explanation?: string;
+  imageUrl?: string;
+  points: number;
+  position: number;
+}
+
+export interface QuizDetail {
+  quiz: Quiz;
+  questions: QuizQuestion[];
+}
+
+export type CreateQuizBodyDifficulty =
+  (typeof CreateQuizBodyDifficulty)[keyof typeof CreateQuizBodyDifficulty];
+
+export const CreateQuizBodyDifficulty = {
+  easy: "easy",
+  medium: "medium",
+  hard: "hard",
+  expert: "expert",
+} as const;
+
+export type CreateQuizBodyStatus =
+  (typeof CreateQuizBodyStatus)[keyof typeof CreateQuizBodyStatus];
+
+export const CreateQuizBodyStatus = {
+  draft: "draft",
+  published: "published",
+  archived: "archived",
+} as const;
+
+export interface CreateQuizBody {
+  title: string;
+  description?: string;
+  category?: string;
+  difficulty?: CreateQuizBodyDifficulty;
+  language?: string;
+  timeLimitSeconds?: number;
+  coverUrl?: string;
+  isPublic?: boolean;
+  status?: CreateQuizBodyStatus;
+  tags?: string[];
+}
+
+export type UpdateQuizBodyDifficulty =
+  (typeof UpdateQuizBodyDifficulty)[keyof typeof UpdateQuizBodyDifficulty];
+
+export const UpdateQuizBodyDifficulty = {
+  easy: "easy",
+  medium: "medium",
+  hard: "hard",
+  expert: "expert",
+} as const;
+
+export type UpdateQuizBodyStatus =
+  (typeof UpdateQuizBodyStatus)[keyof typeof UpdateQuizBodyStatus];
+
+export const UpdateQuizBodyStatus = {
+  draft: "draft",
+  published: "published",
+  archived: "archived",
+} as const;
+
+export interface UpdateQuizBody {
+  title?: string;
+  description?: string;
+  category?: string;
+  difficulty?: UpdateQuizBodyDifficulty;
+  language?: string;
+  timeLimitSeconds?: number;
+  coverUrl?: string;
+  isPublic?: boolean;
+  status?: UpdateQuizBodyStatus;
+  tags?: string[];
+}
+
+export type CreateQuestionBodyType =
+  (typeof CreateQuestionBodyType)[keyof typeof CreateQuestionBodyType];
+
+export const CreateQuestionBodyType = {
+  mcq: "mcq",
+  multi: "multi",
+  truefalse: "truefalse",
+  short: "short",
+  fill: "fill",
+  ordering: "ordering",
+} as const;
+
+export interface CreateQuestionBody {
+  type: CreateQuestionBodyType;
+  prompt: string;
+  options?: unknown;
+  correctAnswer?: unknown;
+  explanation?: string;
+  imageUrl?: string;
+  points?: number;
+  position?: number;
+}
+
+export type UpdateQuestionBodyType =
+  (typeof UpdateQuestionBodyType)[keyof typeof UpdateQuestionBodyType];
+
+export const UpdateQuestionBodyType = {
+  mcq: "mcq",
+  multi: "multi",
+  truefalse: "truefalse",
+  short: "short",
+  fill: "fill",
+  ordering: "ordering",
+} as const;
+
+export interface UpdateQuestionBody {
+  type?: UpdateQuestionBodyType;
+  prompt?: string;
+  options?: unknown;
+  correctAnswer?: unknown;
+  explanation?: string;
+  imageUrl?: string;
+  points?: number;
+  position?: number;
+}
+
+export type QuizAttemptStatus =
+  (typeof QuizAttemptStatus)[keyof typeof QuizAttemptStatus];
+
+export const QuizAttemptStatus = {
+  in_progress: "in_progress",
+  completed: "completed",
+  abandoned: "abandoned",
+} as const;
+
+export interface QuizAttempt {
+  id: string;
+  quizId: string;
+  userId: number;
+  userName: string;
+  score: number;
+  totalPoints: number;
+  correctCount: number;
+  totalCount: number;
+  durationMs: number;
+  status: QuizAttemptStatus;
+  startedAt: string;
+  finishedAt?: string | null;
+}
+
+export interface QuizAnswer {
+  id: string;
+  attemptId: string;
+  questionId: string;
+  response?: unknown;
+  isCorrect: boolean;
+  pointsEarned: number;
+  timeSpentMs: number;
+  answeredAt: string;
+}
+
+export interface AttemptStart {
+  attempt: QuizAttempt;
+  quiz: Quiz;
+  questions: QuizQuestion[];
+}
+
+export interface SubmitAnswerBody {
+  questionId: number;
+  response?: unknown;
+  timeSpentMs?: number;
+}
+
+export interface SubmitAnswerResult {
+  answer: QuizAnswer;
+  correctAnswer?: unknown;
+  explanation?: string;
+  score: number;
+  correctCount: number;
+}
+
+export interface AttemptResult {
+  attempt: QuizAttempt;
+  quiz?: Quiz | null;
+  questions: QuizQuestion[];
+  answers: QuizAnswer[];
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId: number;
+  userName: string;
+  points: number;
+  attempts: number;
+  bestScore: number;
+  accuracy: number;
+}
+
+export interface Leaderboard {
+  window: string;
+  entries: LeaderboardEntry[];
+}
+
+export type QuizChallengeType =
+  (typeof QuizChallengeType)[keyof typeof QuizChallengeType];
+
+export const QuizChallengeType = {
+  weekly: "weekly",
+  monthly: "monthly",
+  flash: "flash",
+  custom: "custom",
+} as const;
+
+export interface QuizChallenge {
+  id: string;
+  title: string;
+  description: string;
+  type: QuizChallengeType;
+  quizId: string;
+  prize: string;
+  bannerUrl: string;
+  startsAt: string;
+  endsAt: string;
+  status: string;
+  createdAt: string;
+}
+
+export type CreateChallengeBodyType =
+  (typeof CreateChallengeBodyType)[keyof typeof CreateChallengeBodyType];
+
+export const CreateChallengeBodyType = {
+  weekly: "weekly",
+  monthly: "monthly",
+  flash: "flash",
+  custom: "custom",
+} as const;
+
+export interface CreateChallengeBody {
+  title?: string;
+  description?: string;
+  type?: CreateChallengeBodyType;
+  quizId: number;
+  prize?: string;
+  bannerUrl?: string;
+  startsAt?: string;
+  endsAt?: string;
+}
+
+export type UpdateChallengeBodyType =
+  (typeof UpdateChallengeBodyType)[keyof typeof UpdateChallengeBodyType];
+
+export const UpdateChallengeBodyType = {
+  weekly: "weekly",
+  monthly: "monthly",
+  flash: "flash",
+  custom: "custom",
+} as const;
+
+export interface UpdateChallengeBody {
+  title?: string;
+  description?: string;
+  type?: UpdateChallengeBodyType;
+  prize?: string;
+  bannerUrl?: string;
+  startsAt?: string;
+  endsAt?: string;
+  status?: string;
+}
+
 export type Login401 = {
   error: string;
 };
@@ -408,3 +730,30 @@ export type AdminListAuditParams = {
    */
   limit?: number;
 };
+
+export type QaListQuizzesParams = {
+  q?: string;
+  category?: string;
+  difficulty?: string;
+  status?: string;
+  limit?: number;
+};
+
+export type QaListMyAttemptsParams = {
+  limit?: number;
+};
+
+export type QaLeaderboardParams = {
+  window?: QaLeaderboardWindow;
+  limit?: number;
+};
+
+export type QaLeaderboardWindow =
+  (typeof QaLeaderboardWindow)[keyof typeof QaLeaderboardWindow];
+
+export const QaLeaderboardWindow = {
+  today: "today",
+  week: "week",
+  month: "month",
+  all: "all",
+} as const;

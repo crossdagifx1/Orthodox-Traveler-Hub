@@ -23,7 +23,16 @@ import { AdminUsers } from "./pages/admin/AdminUsers";
 import { AdminAudit } from "./pages/admin/AdminAudit";
 import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
 import { AdminSettings } from "./pages/admin/AdminSettings";
+import { AdminQuizzes } from "./pages/admin/AdminQuizzes";
+import { AdminQuizEdit } from "./pages/admin/AdminQuizEdit";
 import { AdminGuard } from "@/components/auth/AdminGuard";
+
+import { Learn } from "./pages/learn/Learn";
+import { QuizDetail } from "./pages/learn/QuizDetail";
+import { QuizPlayer } from "./pages/learn/QuizPlayer";
+import { QuizResults } from "./pages/learn/QuizResults";
+import { Leaderboard } from "./pages/learn/Leaderboard";
+import { Challenges } from "./pages/learn/Challenges";
 
 export function AppRoutes() {
   return (
@@ -44,6 +53,14 @@ export function AppRoutes() {
 
         <Route path="/news/:id" component={NewsDetail} />
         <Route path="/news" component={News} />
+
+        {/* Q&A / Learn */}
+        <Route path="/learn" component={Learn} />
+        <Route path="/learn/leaderboard" component={Leaderboard} />
+        <Route path="/learn/challenges" component={Challenges} />
+        <Route path="/learn/quizzes/:id" component={QuizDetail} />
+        <Route path="/learn/play/:id" component={QuizPlayer} />
+        <Route path="/learn/results/:id" component={QuizResults} />
 
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/destinations">
@@ -89,6 +106,16 @@ export function AppRoutes() {
         <Route path="/admin/settings">
           <AdminGuard minRole="superadmin">
             <AdminSettings />
+          </AdminGuard>
+        </Route>
+        <Route path="/admin/qa">
+          <AdminGuard minRole="moderator">
+            <AdminQuizzes />
+          </AdminGuard>
+        </Route>
+        <Route path="/admin/qa/:id">
+          <AdminGuard minRole="moderator">
+            <AdminQuizEdit />
           </AdminGuard>
         </Route>
       </Switch>

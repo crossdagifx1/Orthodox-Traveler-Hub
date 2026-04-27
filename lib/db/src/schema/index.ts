@@ -9,6 +9,8 @@ import {
   numeric,
   varchar,
   jsonb,
+  index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
@@ -139,3 +141,142 @@ export const systemSettingsTable = pgTable("system_settings", {
   updatedBy: integer("updated_by"),
 });
 export type SystemSetting = typeof systemSettingsTable.$inferSelect;
+
+/**
+ * ───────────────────────────── Q&A / LEARN ─────────────────────────────
+ * A full quiz / Q&A platform: teachers (moderator+) author quizzes; users
+ * take attempts; scores feed weekly / monthly / all-time leaderboards;
+ * challenges spotlight a quiz for a window of time; quizzes can be joined
+ * by a short alphanumeric `code`.
+ */
+export const quizzesTable = pgTable("quizzes", {
+  id: serial("id").primaryKey(),
+  /** Short, human-shareable code (6-8 chars, A–Z / 0–9). Unique. */
+  code: varchar("code", { length: 16 }).notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  category: varchar("category", { length: 64 }).notNull().default("general"),
+  difficulty: varchar("difficulty", { length: 16 }).notNull().default("easy"),
+  language: varchar("language", { length: 8 }).notNull().default("en"),
+  /** 0 = no time limit; otherwise total seconds for the whole quiz. */
+  timeLimitSeconds: integer("time_limit_seconds").notNull().default(0),
+  /** Cached sum of question points; updated on question CRUD. */
+  pointsTotal: integer("points_total").notNull().default(0),
+  /** Cached count of attempts (status='completed'). */
+  attemptsCount: integer("attempts_count").notNull().default(0),
+  coverUrl: text("cover_url").notNull().default(""),
+  authorId: integer("author_id"),
+  authorName: varchar("author_name", { length: 255 }).notNull().default(""),
+  isPublic: boolean("is_public").notNull().default(true),
+  /** 'draft' | 'published' | 'archived' */
+  status: varchar("status", { length: 16 }).notNull().default("published"),
+  tags: text("tags").array().notNull().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export type Quiz = typeof quizzesTable.$inferSelect;
+
+/**
+ * One question of a quiz. `type` controls how `options` and `correctAnswer`
+ * are interpreted (see backend validators):
+ *   - 'mcq'        single correct: options=[{id,text}], correctAnswer=string id
+ *   - 'multi'      multiple correct: same options, correctAnswer=string[] of ids
+ *   - 'truefalse'  correctAnswer="true" | "false"
+ *   - 'short'      free text: correctAnswer=string (case-insensitive)
+ *   - 'fill'       options=[{blanks:n}] correctAnswer=string[] per blank
+ *   - 'ordering'   options=[{id,text}] correctAnswer=string[] (ids in order)
+ */
+export const quizQuestionsTable = pgTable(
+  "quiz_questions",
+  {
+    id: serial("id").primaryKey(),
+    quizId: integer("quiz_id").notNull(),
+    type: varchar("type", { length: 16 }).notNull().default("mcq"),
+    prompt: text("prompt").notNull(),
+    options: jsonb("options").notNull().default([]),
+    correctAnswer: jsonb("correct_answer").notNull().default({}),
+    explanation: text("explanation").notNull().default(""),
+    imageUrl: text("image_url").notNull().default(""),
+    points: integer("points").notNull().default(10),
+    position: integer("position").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    quizPosIdx: index("quiz_questions_quiz_pos_idx").on(t.quizId, t.position),
+  }),
+);
+export type QuizQuestion = typeof quizQuestionsTable.$inferSelect;
+
+/**
+ * One user's attempt at a quiz. While in_progress, the score/correct counts
+ * are partial; on /finish, they're final. Multiple attempts per (user,quiz)
+ * are allowed — leaderboard takes best.
+ */
+export const quizAttemptsTable = pgTable(
+  "quiz_attempts",
+  {
+    id: serial("id").primaryKey(),
+    quizId: integer("quiz_id").notNull(),
+    userId: integer("user_id").notNull(),
+    userName: varchar("user_name", { length: 255 }).notNull().default(""),
+    score: integer("score").notNull().default(0),
+    totalPoints: integer("total_points").notNull().default(0),
+    correctCount: integer("correct_count").notNull().default(0),
+    totalCount: integer("total_count").notNull().default(0),
+    durationMs: integer("duration_ms").notNull().default(0),
+    /** 'in_progress' | 'completed' | 'abandoned' */
+    status: varchar("status", { length: 16 }).notNull().default("in_progress"),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+  },
+  (t) => ({
+    userIdx: index("quiz_attempts_user_idx").on(t.userId, t.startedAt),
+    leaderboardIdx: index("quiz_attempts_leaderboard_idx").on(t.status, t.finishedAt),
+    quizIdx: index("quiz_attempts_quiz_idx").on(t.quizId),
+  }),
+);
+export type QuizAttempt = typeof quizAttemptsTable.$inferSelect;
+
+/** One submitted answer in an attempt. */
+export const quizAnswersTable = pgTable(
+  "quiz_answers",
+  {
+    id: serial("id").primaryKey(),
+    attemptId: integer("attempt_id").notNull(),
+    questionId: integer("question_id").notNull(),
+    response: jsonb("response").notNull().default({}),
+    isCorrect: boolean("is_correct").notNull().default(false),
+    pointsEarned: integer("points_earned").notNull().default(0),
+    timeSpentMs: integer("time_spent_ms").notNull().default(0),
+    answeredAt: timestamp("answered_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    // Critical: enforces one answer row per (attempt, question) so concurrent
+    // submissions can't double-count and so onConflictDoUpdate is safe.
+    attemptQuestionUniq: uniqueIndex("quiz_answers_attempt_question_uniq").on(
+      t.attemptId,
+      t.questionId,
+    ),
+  }),
+);
+export type QuizAnswer = typeof quizAnswersTable.$inferSelect;
+
+/**
+ * A challenge spotlights a quiz for a window of time and pairs it with a
+ * mini-leaderboard / prize. Type indicates the cadence.
+ */
+export const quizChallengesTable = pgTable("quiz_challenges", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  /** 'weekly' | 'monthly' | 'flash' | 'custom' */
+  type: varchar("type", { length: 16 }).notNull().default("weekly"),
+  quizId: integer("quiz_id").notNull(),
+  prize: text("prize").notNull().default(""),
+  bannerUrl: text("banner_url").notNull().default(""),
+  startsAt: timestamp("starts_at", { withTimezone: true }).notNull().defaultNow(),
+  endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+  status: varchar("status", { length: 16 }).notNull().default("active"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export type QuizChallenge = typeof quizChallengesTable.$inferSelect;

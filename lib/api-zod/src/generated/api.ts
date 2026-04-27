@@ -897,3 +897,556 @@ export const AdminUpdateSystemSettingResponse = zod.object({
   updatedAt: zod.coerce.date(),
   updatedBy: zod.union([zod.number(), zod.null()]).optional(),
 });
+
+export const QaListQuizzesQueryParams = zod.object({
+  q: zod.coerce.string().optional(),
+  category: zod.coerce.string().optional(),
+  difficulty: zod.coerce.string().optional(),
+  status: zod.coerce.string().optional(),
+  limit: zod.coerce.number().optional(),
+});
+
+export const QaListQuizzesResponseItem = zod.object({
+  id: zod.string(),
+  code: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  category: zod.string(),
+  difficulty: zod.enum(["easy", "medium", "hard", "expert"]),
+  language: zod.string(),
+  timeLimitSeconds: zod.number(),
+  pointsTotal: zod.number(),
+  attemptsCount: zod.number(),
+  coverUrl: zod.string(),
+  authorId: zod.union([zod.number(), zod.null()]).optional(),
+  authorName: zod.string(),
+  isPublic: zod.boolean(),
+  status: zod.enum(["draft", "published", "archived"]),
+  tags: zod.array(zod.string()),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const QaListQuizzesResponse = zod.array(QaListQuizzesResponseItem);
+
+export const QaCreateQuizBody = zod.object({
+  title: zod.string(),
+  description: zod.string().optional(),
+  category: zod.string().optional(),
+  difficulty: zod.enum(["easy", "medium", "hard", "expert"]).optional(),
+  language: zod.string().optional(),
+  timeLimitSeconds: zod.number().optional(),
+  coverUrl: zod.string().optional(),
+  isPublic: zod.boolean().optional(),
+  status: zod.enum(["draft", "published", "archived"]).optional(),
+  tags: zod.array(zod.string()).optional(),
+});
+
+export const QaCreateQuizResponse = zod.object({
+  id: zod.string(),
+  code: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  category: zod.string(),
+  difficulty: zod.enum(["easy", "medium", "hard", "expert"]),
+  language: zod.string(),
+  timeLimitSeconds: zod.number(),
+  pointsTotal: zod.number(),
+  attemptsCount: zod.number(),
+  coverUrl: zod.string(),
+  authorId: zod.union([zod.number(), zod.null()]).optional(),
+  authorName: zod.string(),
+  isPublic: zod.boolean(),
+  status: zod.enum(["draft", "published", "archived"]),
+  tags: zod.array(zod.string()),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+export const QaGetQuizByCodeParams = zod.object({
+  code: zod.coerce.string(),
+});
+
+export const QaGetQuizByCodeResponse = zod.object({
+  id: zod.string(),
+  code: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  category: zod.string(),
+  difficulty: zod.enum(["easy", "medium", "hard", "expert"]),
+  language: zod.string(),
+  timeLimitSeconds: zod.number(),
+  pointsTotal: zod.number(),
+  attemptsCount: zod.number(),
+  coverUrl: zod.string(),
+  authorId: zod.union([zod.number(), zod.null()]).optional(),
+  authorName: zod.string(),
+  isPublic: zod.boolean(),
+  status: zod.enum(["draft", "published", "archived"]),
+  tags: zod.array(zod.string()),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+export const QaGetQuizParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaGetQuizResponse = zod.object({
+  quiz: zod.object({
+    id: zod.string(),
+    code: zod.string(),
+    title: zod.string(),
+    description: zod.string(),
+    category: zod.string(),
+    difficulty: zod.enum(["easy", "medium", "hard", "expert"]),
+    language: zod.string(),
+    timeLimitSeconds: zod.number(),
+    pointsTotal: zod.number(),
+    attemptsCount: zod.number(),
+    coverUrl: zod.string(),
+    authorId: zod.union([zod.number(), zod.null()]).optional(),
+    authorName: zod.string(),
+    isPublic: zod.boolean(),
+    status: zod.enum(["draft", "published", "archived"]),
+    tags: zod.array(zod.string()),
+    createdAt: zod.coerce.date(),
+    updatedAt: zod.coerce.date(),
+  }),
+  questions: zod.array(
+    zod.object({
+      id: zod.string(),
+      quizId: zod.string(),
+      type: zod.enum([
+        "mcq",
+        "multi",
+        "truefalse",
+        "short",
+        "fill",
+        "ordering",
+      ]),
+      prompt: zod.string(),
+      options: zod.unknown(),
+      correctAnswer: zod.unknown().optional(),
+      explanation: zod.string().optional(),
+      imageUrl: zod.string().optional(),
+      points: zod.number(),
+      position: zod.number(),
+    }),
+  ),
+});
+
+export const QaUpdateQuizParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaUpdateQuizBody = zod.object({
+  title: zod.string().optional(),
+  description: zod.string().optional(),
+  category: zod.string().optional(),
+  difficulty: zod.enum(["easy", "medium", "hard", "expert"]).optional(),
+  language: zod.string().optional(),
+  timeLimitSeconds: zod.number().optional(),
+  coverUrl: zod.string().optional(),
+  isPublic: zod.boolean().optional(),
+  status: zod.enum(["draft", "published", "archived"]).optional(),
+  tags: zod.array(zod.string()).optional(),
+});
+
+export const QaUpdateQuizResponse = zod.object({
+  id: zod.string(),
+  code: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  category: zod.string(),
+  difficulty: zod.enum(["easy", "medium", "hard", "expert"]),
+  language: zod.string(),
+  timeLimitSeconds: zod.number(),
+  pointsTotal: zod.number(),
+  attemptsCount: zod.number(),
+  coverUrl: zod.string(),
+  authorId: zod.union([zod.number(), zod.null()]).optional(),
+  authorName: zod.string(),
+  isPublic: zod.boolean(),
+  status: zod.enum(["draft", "published", "archived"]),
+  tags: zod.array(zod.string()),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+export const QaDeleteQuizParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaDeleteQuizResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+export const QaCreateQuestionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaCreateQuestionBody = zod.object({
+  type: zod.enum(["mcq", "multi", "truefalse", "short", "fill", "ordering"]),
+  prompt: zod.string(),
+  options: zod.unknown().optional(),
+  correctAnswer: zod.unknown().optional(),
+  explanation: zod.string().optional(),
+  imageUrl: zod.string().optional(),
+  points: zod.number().optional(),
+  position: zod.number().optional(),
+});
+
+export const QaCreateQuestionResponse = zod.object({
+  id: zod.string(),
+  quizId: zod.string(),
+  type: zod.enum(["mcq", "multi", "truefalse", "short", "fill", "ordering"]),
+  prompt: zod.string(),
+  options: zod.unknown(),
+  correctAnswer: zod.unknown().optional(),
+  explanation: zod.string().optional(),
+  imageUrl: zod.string().optional(),
+  points: zod.number(),
+  position: zod.number(),
+});
+
+export const QaUpdateQuestionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaUpdateQuestionBody = zod.object({
+  type: zod
+    .enum(["mcq", "multi", "truefalse", "short", "fill", "ordering"])
+    .optional(),
+  prompt: zod.string().optional(),
+  options: zod.unknown().optional(),
+  correctAnswer: zod.unknown().optional(),
+  explanation: zod.string().optional(),
+  imageUrl: zod.string().optional(),
+  points: zod.number().optional(),
+  position: zod.number().optional(),
+});
+
+export const QaUpdateQuestionResponse = zod.object({
+  id: zod.string(),
+  quizId: zod.string(),
+  type: zod.enum(["mcq", "multi", "truefalse", "short", "fill", "ordering"]),
+  prompt: zod.string(),
+  options: zod.unknown(),
+  correctAnswer: zod.unknown().optional(),
+  explanation: zod.string().optional(),
+  imageUrl: zod.string().optional(),
+  points: zod.number(),
+  position: zod.number(),
+});
+
+export const QaDeleteQuestionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaDeleteQuestionResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+export const QaStartAttemptParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaStartAttemptResponse = zod.object({
+  attempt: zod.object({
+    id: zod.string(),
+    quizId: zod.string(),
+    userId: zod.number(),
+    userName: zod.string(),
+    score: zod.number(),
+    totalPoints: zod.number(),
+    correctCount: zod.number(),
+    totalCount: zod.number(),
+    durationMs: zod.number(),
+    status: zod.enum(["in_progress", "completed", "abandoned"]),
+    startedAt: zod.coerce.date(),
+    finishedAt: zod.union([zod.coerce.date(), zod.null()]).optional(),
+  }),
+  quiz: zod.object({
+    id: zod.string(),
+    code: zod.string(),
+    title: zod.string(),
+    description: zod.string(),
+    category: zod.string(),
+    difficulty: zod.enum(["easy", "medium", "hard", "expert"]),
+    language: zod.string(),
+    timeLimitSeconds: zod.number(),
+    pointsTotal: zod.number(),
+    attemptsCount: zod.number(),
+    coverUrl: zod.string(),
+    authorId: zod.union([zod.number(), zod.null()]).optional(),
+    authorName: zod.string(),
+    isPublic: zod.boolean(),
+    status: zod.enum(["draft", "published", "archived"]),
+    tags: zod.array(zod.string()),
+    createdAt: zod.coerce.date(),
+    updatedAt: zod.coerce.date(),
+  }),
+  questions: zod.array(
+    zod.object({
+      id: zod.string(),
+      quizId: zod.string(),
+      type: zod.enum([
+        "mcq",
+        "multi",
+        "truefalse",
+        "short",
+        "fill",
+        "ordering",
+      ]),
+      prompt: zod.string(),
+      options: zod.unknown(),
+      correctAnswer: zod.unknown().optional(),
+      explanation: zod.string().optional(),
+      imageUrl: zod.string().optional(),
+      points: zod.number(),
+      position: zod.number(),
+    }),
+  ),
+});
+
+export const QaSubmitAnswerParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaSubmitAnswerBody = zod.object({
+  questionId: zod.number(),
+  response: zod.unknown().optional(),
+  timeSpentMs: zod.number().optional(),
+});
+
+export const QaSubmitAnswerResponse = zod.object({
+  answer: zod.object({
+    id: zod.string(),
+    attemptId: zod.string(),
+    questionId: zod.string(),
+    response: zod.unknown().optional(),
+    isCorrect: zod.boolean(),
+    pointsEarned: zod.number(),
+    timeSpentMs: zod.number(),
+    answeredAt: zod.coerce.date(),
+  }),
+  correctAnswer: zod.unknown().optional(),
+  explanation: zod.string().optional(),
+  score: zod.number(),
+  correctCount: zod.number(),
+});
+
+export const QaFinishAttemptParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaFinishAttemptResponse = zod.object({
+  id: zod.string(),
+  quizId: zod.string(),
+  userId: zod.number(),
+  userName: zod.string(),
+  score: zod.number(),
+  totalPoints: zod.number(),
+  correctCount: zod.number(),
+  totalCount: zod.number(),
+  durationMs: zod.number(),
+  status: zod.enum(["in_progress", "completed", "abandoned"]),
+  startedAt: zod.coerce.date(),
+  finishedAt: zod.union([zod.coerce.date(), zod.null()]).optional(),
+});
+
+export const QaGetAttemptParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaGetAttemptResponse = zod.object({
+  attempt: zod.object({
+    id: zod.string(),
+    quizId: zod.string(),
+    userId: zod.number(),
+    userName: zod.string(),
+    score: zod.number(),
+    totalPoints: zod.number(),
+    correctCount: zod.number(),
+    totalCount: zod.number(),
+    durationMs: zod.number(),
+    status: zod.enum(["in_progress", "completed", "abandoned"]),
+    startedAt: zod.coerce.date(),
+    finishedAt: zod.union([zod.coerce.date(), zod.null()]).optional(),
+  }),
+  quiz: zod
+    .union([
+      zod.object({
+        id: zod.string(),
+        code: zod.string(),
+        title: zod.string(),
+        description: zod.string(),
+        category: zod.string(),
+        difficulty: zod.enum(["easy", "medium", "hard", "expert"]),
+        language: zod.string(),
+        timeLimitSeconds: zod.number(),
+        pointsTotal: zod.number(),
+        attemptsCount: zod.number(),
+        coverUrl: zod.string(),
+        authorId: zod.union([zod.number(), zod.null()]).optional(),
+        authorName: zod.string(),
+        isPublic: zod.boolean(),
+        status: zod.enum(["draft", "published", "archived"]),
+        tags: zod.array(zod.string()),
+        createdAt: zod.coerce.date(),
+        updatedAt: zod.coerce.date(),
+      }),
+      zod.null(),
+    ])
+    .optional(),
+  questions: zod.array(
+    zod.object({
+      id: zod.string(),
+      quizId: zod.string(),
+      type: zod.enum([
+        "mcq",
+        "multi",
+        "truefalse",
+        "short",
+        "fill",
+        "ordering",
+      ]),
+      prompt: zod.string(),
+      options: zod.unknown(),
+      correctAnswer: zod.unknown().optional(),
+      explanation: zod.string().optional(),
+      imageUrl: zod.string().optional(),
+      points: zod.number(),
+      position: zod.number(),
+    }),
+  ),
+  answers: zod.array(
+    zod.object({
+      id: zod.string(),
+      attemptId: zod.string(),
+      questionId: zod.string(),
+      response: zod.unknown().optional(),
+      isCorrect: zod.boolean(),
+      pointsEarned: zod.number(),
+      timeSpentMs: zod.number(),
+      answeredAt: zod.coerce.date(),
+    }),
+  ),
+});
+
+export const QaListMyAttemptsQueryParams = zod.object({
+  limit: zod.coerce.number().optional(),
+});
+
+export const QaListMyAttemptsResponseItem = zod.object({
+  id: zod.string(),
+  quizId: zod.string(),
+  userId: zod.number(),
+  userName: zod.string(),
+  score: zod.number(),
+  totalPoints: zod.number(),
+  correctCount: zod.number(),
+  totalCount: zod.number(),
+  durationMs: zod.number(),
+  status: zod.enum(["in_progress", "completed", "abandoned"]),
+  startedAt: zod.coerce.date(),
+  finishedAt: zod.union([zod.coerce.date(), zod.null()]).optional(),
+});
+export const QaListMyAttemptsResponse = zod.array(QaListMyAttemptsResponseItem);
+
+export const QaLeaderboardQueryParams = zod.object({
+  window: zod.enum(["today", "week", "month", "all"]).optional(),
+  limit: zod.coerce.number().optional(),
+});
+
+export const QaLeaderboardResponse = zod.object({
+  window: zod.string(),
+  entries: zod.array(
+    zod.object({
+      rank: zod.number(),
+      userId: zod.number(),
+      userName: zod.string(),
+      points: zod.number(),
+      attempts: zod.number(),
+      bestScore: zod.number(),
+      accuracy: zod.number(),
+    }),
+  ),
+});
+
+export const QaListChallengesResponseItem = zod.object({
+  id: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  type: zod.enum(["weekly", "monthly", "flash", "custom"]),
+  quizId: zod.string(),
+  prize: zod.string(),
+  bannerUrl: zod.string(),
+  startsAt: zod.coerce.date(),
+  endsAt: zod.coerce.date(),
+  status: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const QaListChallengesResponse = zod.array(QaListChallengesResponseItem);
+
+export const QaCreateChallengeBody = zod.object({
+  title: zod.string().optional(),
+  description: zod.string().optional(),
+  type: zod.enum(["weekly", "monthly", "flash", "custom"]).optional(),
+  quizId: zod.number(),
+  prize: zod.string().optional(),
+  bannerUrl: zod.string().optional(),
+  startsAt: zod.coerce.date().optional(),
+  endsAt: zod.coerce.date().optional(),
+});
+
+export const QaCreateChallengeResponse = zod.object({
+  id: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  type: zod.enum(["weekly", "monthly", "flash", "custom"]),
+  quizId: zod.string(),
+  prize: zod.string(),
+  bannerUrl: zod.string(),
+  startsAt: zod.coerce.date(),
+  endsAt: zod.coerce.date(),
+  status: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+
+export const QaUpdateChallengeParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaUpdateChallengeBody = zod.object({
+  title: zod.string().optional(),
+  description: zod.string().optional(),
+  type: zod.enum(["weekly", "monthly", "flash", "custom"]).optional(),
+  prize: zod.string().optional(),
+  bannerUrl: zod.string().optional(),
+  startsAt: zod.coerce.date().optional(),
+  endsAt: zod.coerce.date().optional(),
+  status: zod.string().optional(),
+});
+
+export const QaUpdateChallengeResponse = zod.object({
+  id: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  type: zod.enum(["weekly", "monthly", "flash", "custom"]),
+  quizId: zod.string(),
+  prize: zod.string(),
+  bannerUrl: zod.string(),
+  startsAt: zod.coerce.date(),
+  endsAt: zod.coerce.date(),
+  status: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+
+export const QaDeleteChallengeParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const QaDeleteChallengeResponse = zod.object({
+  ok: zod.boolean(),
+});

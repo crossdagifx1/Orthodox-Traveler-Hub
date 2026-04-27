@@ -8,6 +8,7 @@ import marketplaceRouter from "./marketplace";
 import mezmursRouter from "./mezmurs";
 import newsRouter from "./news";
 import adminRouter from "./admin";
+import qaRouter from "./qa";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(marketplaceRouter);
 router.use(mezmursRouter);
 router.use(newsRouter);
 router.use(adminRouter);
+router.use(qaRouter);
 
 export default router;

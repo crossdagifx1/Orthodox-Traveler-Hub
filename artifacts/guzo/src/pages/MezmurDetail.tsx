@@ -25,6 +25,8 @@ import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { usePlayer } from "@/components/audio/PlayerContext";
+import { EngagementSection } from "@/components/engagement/EngagementSection";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export function MezmurDetail() {
   const { t } = useTranslation();
@@ -43,13 +45,13 @@ export function MezmurDetail() {
 
   const related = useMemo(() => {
     if (!mezmur || !allMezmurs) return [];
-    return allMezmurs
+    return (Array.isArray(allMezmurs) ? allMezmurs : [])
       .filter((m) => m.id !== mezmur.id && m.category === mezmur.category)
       .slice(0, 5);
   }, [mezmur, allMezmurs]);
 
   const trendingNow = useMemo(() => {
-    return (trending ?? []).filter((m) => m.id !== mezmur?.id).slice(0, 5);
+    return (Array.isArray(trending) ? trending : []).filter((m) => m.id !== mezmur?.id).slice(0, 5);
   }, [trending, mezmur]);
 
   const { playTrack, pauseTrack, resumeTrack, currentTrack, isPlaying } = usePlayer();
@@ -91,6 +93,12 @@ export function MezmurDetail() {
 
   return (
     <div className="min-h-full bg-background pb-32">
+      <SeoHead
+        title={`${mezmur.title} — ${mezmur.artist}`}
+        description={mezmur.lyrics?.slice(0, 160) || `${mezmur.category} mezmur in ${mezmur.language}.`}
+        image={mezmur.coverUrl}
+        type="music.song"
+      />
       {/* Top bar */}
       <div className="px-3 py-3 flex justify-between items-center">
         <Button
@@ -319,6 +327,8 @@ export function MezmurDetail() {
           {t("mezmurs.subtitle")}
         </div>
       </div>
+
+      <EngagementSection targetType="mezmur" targetId={id} />
     </div>
   );
 }

@@ -6,6 +6,8 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 import { SettingsSheet } from "./SettingsSheet";
 import { MainNavSheet } from "./MainNavSheet";
+import { StreakChip } from "@/components/engagement/StreakChip";
+import { NotificationsBell } from "@/components/engagement/NotificationsBell";
 
 /**
  * Top-bar replacement: chrome-less floating action buttons.
@@ -56,12 +58,19 @@ export function FloatingControls() {
           {language === "am" ? "EN" : "አማ"}
         </button>
 
+        {!isLoading && isAuthed && (
+          <>
+            <StreakChip />
+            <NotificationsBell />
+          </>
+        )}
+
         {!isLoading &&
           (isAuthed ? (
             <Link
-              href={isAdmin ? "/admin" : "/"}
+              href={isAdmin ? "/admin" : "/me"}
               data-testid="button-user"
-              aria-label={t("auth.signIn")}
+              aria-label={t("profile.title", { defaultValue: "Profile" })}
               className="pointer-events-auto h-9 w-9 rounded-full flex items-center justify-center bg-background/80 backdrop-blur-md border border-border/60 shadow-md text-foreground hover-elevate active-elevate-2 no-underline"
             >
               <User className="h-4 w-4" />

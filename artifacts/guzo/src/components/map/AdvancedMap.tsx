@@ -14,8 +14,13 @@ import {
   X,
   Loader2,
   Navigation,
+  Church,
+  MapPin,
+  Building2,
+  Layers3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEthiopianOrthodoxChurches, googlePlaceToMarker } from "@/hooks/useGooglePlaces";
 
 /**
  * Free-tier "Mapbox + Google Maps killer". Multi-provider tile layers
@@ -67,9 +72,14 @@ const LAYERS: Layer[] = [
   {
     key: "hybrid",
     label: "Hybrid",
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-    attribution: "Labels &copy; Esri",
+    // Single-layer hybrid: Esri World_Imagery base + reference labels added
+    // automatically by the layer-switch effect. Use the satellite URL here so
+    // the base map is always present.
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution:
+      "Tiles &copy; Esri, Maxar, Earthstar Geographics &middot; Labels &copy; Esri",
     maxZoom: 19,
+    satellite: true,
   },
   {
     key: "terrain",
@@ -78,6 +88,14 @@ const LAYERS: Layer[] = [
     attribution:
       "Map data: &copy; <a href='https://www.openstreetmap.org/copyright'>OSM</a> contributors, SRTM | Map style: &copy; <a href='https://opentopomap.org'>OpenTopoMap</a>",
     maxZoom: 17,
+  },
+  {
+    key: "watercolor",
+    label: "Watercolor",
+    url: "https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg",
+    attribution:
+      "&copy; <a href='https://stadiamaps.com/'>Stadia Maps</a> &copy; <a href='https://stamen.com/'>Stamen Design</a> &copy; OSM",
+    maxZoom: 16,
   },
   {
     key: "osm",
@@ -96,6 +114,10 @@ const LAYERS: Layer[] = [
   },
 ];
 
+/** Reference labels overlay used on top of satellite imagery in Hybrid mode. */
+const HYBRID_LABELS_URL =
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}";
+
 /** Custom gold Orthodox-cross divIcon. */
 function makeCrossIcon(color = "#c8941f", size = 32): L.DivIcon {
   const html = `
@@ -110,12 +132,40 @@ function makeCrossIcon(color = "#c8941f", size = 32): L.DivIcon {
       "></div>
       <svg viewBox="0 0 24 24" width="${size}" height="${size}"
            style="position:absolute; inset:0;" fill="#fff" stroke="#fff" stroke-width="0.5">
-        <path d="M11 4h2v3h3v2h-3v3h3v2h-3v8h-2v-8H8v-2h3V9H8V7h3z"/>
+        <path d="M11 4h2v3h3v2h-3v3h3v2h-3z"/>
       </svg>
     </div>`;
   return L.divIcon({
     html,
     className: "guzo-cross-marker",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2 + 2],
+  });
+}
+
+/** Custom church icon with blue color to distinguish from regular markers */
+function makeChurchIcon(size = 32): L.DivIcon {
+  const html = `
+    <div style="
+      position:relative; width:${size}px; height:${size}px;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
+    ">
+      <div style="
+        position:absolute; inset:0; border-radius:50%;
+        background: radial-gradient(circle at 30% 30%, #3b82f6ee, #2563eb99);
+        border: 2px solid #fff;
+      "></div>
+      <svg viewBox="0 0 24 24" width="${size}" height="${size}"
+           style="position:absolute; inset:0;" fill="#fff" stroke="#fff" stroke-width="0.5">
+        <path d="M12 2L2 7v10l10 5V7L12 2z"/>
+        <path d="M12 2L12 7m-6 0l-2 2m10-2l2-2"/>
+        <path d="M12 12v6m3 0v-6"/>
+      </svg>
+    </div>`;
+  return L.divIcon({
+    html,
+    className: "guzo-church-marker",
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2 + 2],
@@ -160,6 +210,23 @@ export function AdvancedMap({
   const [routeStatus, setRouteStatus] = useState("");
   const routeLayerRef = useRef<L.LayerGroup | null>(null);
   const routePointsRef = useRef<L.LatLng[]>([]);
+  const [show3D, setShow3D] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showGoogleChurches, setShowGoogleChurches] = useState(true);
+
+  // Fetch Ethiopian Orthodox churches from database
+  const { data: googleChurchesData, isLoading: loadingChurches } = useEthiopianOrthodoxChurches();
+  const googleChurches = googleChurchesData || [];
+
+  // Combine markers with Google Places churches
+  const allMarkers = useMemo(() => {
+    const baseMarkers = markers;
+    if (showGoogleChurches && googleChurches.length > 0) {
+      const churchMarkers = googleChurches.map(googlePlaceToMarker);
+      return [...baseMarkers, ...churchMarkers];
+    }
+    return baseMarkers;
+  }, [markers, googleChurches, showGoogleChurches]);
 
   /** Keep `isFullscreen` in sync with the browser even when Esc / native UI is used. */
   useEffect(() => {
@@ -203,16 +270,25 @@ export function AdvancedMap({
       attribution: def.attribution,
       maxZoom: def.maxZoom ?? 19,
       detectRetina: true,
+      // Pre-load tiles 2 rings outside the visible area for a smoother pan.
+      keepBuffer: 4,
+      // Tiny transparent PNG so failed tiles don't show "Map data not yet
+      // available" placeholders from upstream CDNs.
+      errorTileUrl:
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+      crossOrigin: true,
     });
     layer.addTo(map);
     tileLayerRef.current = layer;
-    // Hybrid mode = satellite base + boundaries+places labels overlay.
+    // Hybrid mode = satellite base + reference labels overlay on top.
     if (def.key === "hybrid") {
-      const sat = LAYERS.find((l) => l.key === "satellite")!;
-      const base = L.tileLayer(sat.url, { attribution: sat.attribution, maxZoom: sat.maxZoom });
-      base.addTo(map);
-      tileLayerRef.current = base;
-      const labels = layer;
+      const labels = L.tileLayer(HYBRID_LABELS_URL, {
+        attribution: "Labels &copy; Esri",
+        maxZoom: 19,
+        detectRetina: true,
+        pane: "shadowPane",
+      });
+      labels.addTo(map);
       labelsLayerRef.current = labels;
     }
   }, [layerKey]);
@@ -247,7 +323,7 @@ export function AdvancedMap({
     });
     clusterRef.current = cluster;
 
-    markers.forEach((m) => {
+    allMarkers.forEach((m) => {
       const marker = L.marker([m.lat, m.lng], { icon: makeCrossIcon() });
       const safe = (s: string) =>
         s.replace(/[&<>"']/g, (c) =>
@@ -291,15 +367,15 @@ export function AdvancedMap({
     cluster.addTo(map);
 
     // Auto-fit bounds when we have markers.
-    if (markers.length > 0) {
-      const bounds = L.latLngBounds(markers.map((m) => [m.lat, m.lng] as [number, number]));
+    if (allMarkers.length > 0) {
+      const bounds = L.latLngBounds(allMarkers.map((m) => [m.lat, m.lng] as [number, number]));
       try {
         map.fitBounds(bounds.pad(0.15), { maxZoom: 8, animate: true });
       } catch {
         /* ignore */
       }
     }
-  }, [markers]);
+  }, [allMarkers]);
 
   /** Measure tool: click points to draw segments + total distance. */
   useEffect(() => {
@@ -532,6 +608,32 @@ export function AdvancedMap({
           </button>
           <button
             type="button"
+            aria-label="Toggle Google Churches"
+            onClick={() => setShow3D(!show3D)}
+            data-testid="button-map-3d"
+            className={cn(
+              "h-10 w-10 rounded-full backdrop-blur-md border border-border/60 shadow-md flex items-center justify-center hover-elevate active-elevate-2",
+              show3D ? "bg-primary text-primary-foreground" : "bg-background/95 text-foreground",
+            )}
+            title="Toggle 3D Buildings"
+          >
+            <Building2 className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Toggle Ethiopian Churches"
+            onClick={() => setShowGoogleChurches(!showGoogleChurches)}
+            data-testid="button-map-churches"
+            className={cn(
+              "h-10 w-10 rounded-full backdrop-blur-md border border-border/60 shadow-md flex items-center justify-center hover-elevate active-elevate-2",
+              showGoogleChurches ? "bg-primary text-primary-foreground" : "bg-background/95 text-foreground",
+            )}
+            title="Toggle Ethiopian Orthodox Churches"
+          >
+            <Church className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
             aria-label="Locate me"
             onClick={locateMe}
             data-testid="button-map-locate"
@@ -709,6 +811,61 @@ export function AdvancedMap({
           )}
         >
           {layerDef.label}
+        </div>
+      </div>
+
+      {/* Loading indicator for Google churches */}
+      {loadingChurches && (
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-[399] pointer-events-none">
+          <div className="rounded-full bg-primary/90 text-primary-foreground px-4 py-2 text-xs font-bold shadow-lg flex items-center gap-2">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Loading churches...
+          </div>
+        </div>
+      )}
+
+      {/* Church count badge */}
+      {googleChurches && googleChurches.length > 0 && (
+        <div className="absolute bottom-16 right-3 z-[399] pointer-events-none">
+          <div className="rounded-full bg-secondary/90 text-secondary-foreground px-3 py-1.5 text-[10px] font-bold shadow-lg flex items-center gap-1.5">
+            <Church className="h-3 w-3" />
+            {googleChurches.length} churches
+          </div>
+        </div>
+      )}
+
+      {/* Quick filter buttons */}
+      <div className="absolute top-3 left-3 z-[400] flex gap-2 pointer-events-none">
+        <div className="flex gap-1.5 pointer-events-auto">
+          <button
+            type="button"
+            onClick={() => {
+              if (allMarkers.length > 0) {
+                const bounds = L.latLngBounds(allMarkers.map((m) => [m.lat, m.lng] as [number, number]));
+                mapRef.current?.fitBounds(bounds.pad(0.1), { maxZoom: 10, animate: true });
+              }
+            }}
+            className="h-10 px-4 rounded-full bg-background/95 backdrop-blur-md border border-border/60 shadow-md flex items-center gap-2 text-xs font-semibold hover-elevate active-elevate-2"
+            data-testid="button-map-fit-bounds"
+          >
+            <MapPin className="h-3 w-3" />
+            Fit All
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (googleChurches && googleChurches.length > 0) {
+                const bounds = L.latLngBounds(googleChurches.map((m) => [m.geometry.location.lat, m.geometry.location.lng]));
+                mapRef.current?.fitBounds(bounds.pad(0.1), { maxZoom: 12, animate: true });
+              }
+            }}
+            disabled={!googleChurches || googleChurches.length === 0}
+            className="h-10 px-4 rounded-full bg-background/95 backdrop-blur-md border border-border/60 shadow-md flex items-center gap-2 text-xs font-semibold hover-elevate active-elevate-2 disabled:opacity-50"
+            data-testid="button-map-fit-churches"
+          >
+            <Church className="h-3 w-3" />
+            Churches
+          </button>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Languages, Sun, Moon, Monitor, Calendar, Type, LogOut } from "lucide-react";
+import { Languages, Sun, Moon, Monitor, Calendar, Type, LogOut, Smartphone, Layout } from "lucide-react";
 import { useSettings } from "@/providers/SettingsProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { SUPPORTED_LANGUAGES } from "@/i18n";
@@ -97,6 +97,45 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
                 testId="button-font-lg"
               >
                 <span className="text-base">{t("settings.fontSizeLarge")}</span>
+              </Pill>
+            </div>
+          </section>
+
+          <section>
+            <SectionTitle
+              icon={<Layout className="h-4 w-4" />}
+              label={t("settings.viewMode", { defaultValue: "View mode" })}
+            />
+            <div className="grid grid-cols-3 gap-2">
+              <Pill
+                active={settings.viewMode === "auto"}
+                onClick={() => settings.setViewMode("auto")}
+                testId="button-view-auto"
+              >
+                <Monitor className="h-4 w-4 mx-auto mb-1" />
+                <span className="text-xs">
+                  {t("settings.viewAuto", { defaultValue: "Auto" })}
+                </span>
+              </Pill>
+              <Pill
+                active={settings.viewMode === "phone"}
+                onClick={() => settings.setViewMode("phone")}
+                testId="button-view-phone"
+              >
+                <Smartphone className="h-4 w-4 mx-auto mb-1" />
+                <span className="text-xs">
+                  {t("settings.viewPhone", { defaultValue: "Phone" })}
+                </span>
+              </Pill>
+              <Pill
+                active={settings.viewMode === "desktop"}
+                onClick={() => settings.setViewMode("desktop")}
+                testId="button-view-desktop"
+              >
+                <Layout className="h-4 w-4 mx-auto mb-1" />
+                <span className="text-xs">
+                  {t("settings.viewDesktop", { defaultValue: "Desktop" })}
+                </span>
               </Pill>
             </div>
           </section>

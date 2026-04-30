@@ -5,16 +5,21 @@ import type { LangCode } from "@/i18n";
 type Theme = "light" | "dark" | "auto";
 type FontSize = "sm" | "md" | "lg";
 type CalendarMode = "ethiopian" | "gregorian";
+type ViewMode = "auto" | "phone" | "desktop";
 
 type SettingsState = {
   language: LangCode;
   theme: Theme;
   fontSize: FontSize;
   calendar: CalendarMode;
+  viewMode: ViewMode;
+  /** Effective view ("phone" | "desktop") after resolving "auto". */
+  effectiveView: "phone" | "desktop";
   setLanguage: (l: LangCode) => void;
   setTheme: (t: Theme) => void;
   setFontSize: (s: FontSize) => void;
   setCalendar: (c: CalendarMode) => void;
+  setViewMode: (v: ViewMode) => void;
   isAmharic: boolean;
 };
 
@@ -22,6 +27,10 @@ const SettingsContext = createContext<SettingsState | null>(null);
 const LS_THEME = "guzo-theme";
 const LS_FONT = "guzo-font";
 const LS_CAL = "guzo-cal";
+const LS_VIEW = "guzo-view";
+
+/** Width above which "auto" resolves to desktop. */
+const DESKTOP_BREAKPOINT_PX = 1024;
 
 function readLs<T extends string>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -57,6 +66,29 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [calendar, setCalendarState] = useState<CalendarMode>(
     () => readLs<CalendarMode>(LS_CAL, "ethiopian"),
   );
+  const [viewMode, setViewModeState] = useState<ViewMode>(
+    () => readLs<ViewMode>(LS_VIEW, "auto"),
+  );
+  const [autoIsDesktop, setAutoIsDesktop] = useState<boolean>(() =>
+    typeof window === "undefined"
+      ? false
+      : window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT_PX}px)`).matches,
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT_PX}px)`);
+    const onChange = () => setAutoIsDesktop(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  const effectiveView: "phone" | "desktop" =
+    viewMode === "auto" ? (autoIsDesktop ? "desktop" : "phone") : viewMode;
+
+  useEffect(() => {
+    document.documentElement.dataset.view = effectiveView;
+  }, [effectiveView]);
 
   useEffect(() => {
     applyTheme(theme);
@@ -99,8 +131,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         setCalendarState(c);
         window.localStorage.setItem(LS_CAL, c);
       },
+      setViewMode: (v) => {
+        setViewModeState(v);
+        window.localStorage.setItem(LS_VIEW, v);
+      },
+      viewMode,
+      effectiveView,
     }),
-    [language, theme, fontSize, calendar, i18n],
+    [language, theme, fontSize, calendar, viewMode, effectiveView, i18n],
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

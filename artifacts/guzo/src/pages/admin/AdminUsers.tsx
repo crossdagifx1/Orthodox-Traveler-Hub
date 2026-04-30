@@ -207,7 +207,7 @@ export function AdminUsers() {
       {isLoading && <div className="text-center text-muted-foreground py-8 text-sm">Loading…</div>}
 
       <ul className="space-y-2">
-        {(users ?? []).map((u) => {
+        {(Array.isArray(users) ? users : []).map((u) => {
           const RoleIcon = ROLE_ICON[u.role] ?? UserIcon;
           const isMe = me?.id === u.id;
           return (

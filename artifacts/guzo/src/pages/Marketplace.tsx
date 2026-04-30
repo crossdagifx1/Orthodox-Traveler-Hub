@@ -51,7 +51,7 @@ export function Marketplace() {
   const { data: featured } = useListFeaturedItems();
 
   const sorted = useMemo(() => {
-    const arr = [...(items ?? [])];
+    const arr = [...(Array.isArray(items) ? items : [])];
     switch (sort) {
       case "price-asc":
         arr.sort((a, b) => Number(a.price) - Number(b.price));
@@ -154,7 +154,7 @@ export function Marketplace() {
               {t("common.featured")}
             </div>
             <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
-              {(featured ?? []).slice(0, 8).map((it) => (
+              {(Array.isArray(featured) ? featured : []).slice(0, 8).map((it) => (
                 <Link key={it.id} href={`/marketplace/${it.id}`}>
                   <Card
                     className="w-[140px] shrink-0 rounded-2xl overflow-hidden cursor-pointer hover-elevate group border border-border/60 shadow-sm"

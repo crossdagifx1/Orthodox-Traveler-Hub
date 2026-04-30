@@ -18,6 +18,8 @@ tags:
   - name: auth
   - name: stats
   - name: qa
+  - name: social
+  - name: me
 paths:
   /healthz:
     get:
@@ -1007,6 +1009,324 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/OkResponse" }
 
+  # ─────────────────────────── ENGAGEMENT / SOCIAL ──────────────────────────
+
+  /users/me:
+    get:
+      operationId: getMyProfile
+      tags: [me]
+      summary: Get the signed-in user's full profile (with stats)
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MeProfile" }
+        "401":
+          description: Login required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    patch:
+      operationId: updateMyProfile
+      tags: [me]
+      summary: Update displayName / bio / avatarUrl / isPublic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateMeBody" }
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MeProfile" }
+
+  /users/{id}:
+    get:
+      operationId: getPublicProfile
+      tags: [social]
+      summary: Public read-only profile (404 if not public)
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Public profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicProfile" }
+        "404":
+          description: Not found or not public
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /me/bookmarks:
+    get:
+      operationId: listMyBookmarks
+      tags: [me]
+      summary: List the signed-in user's bookmarks
+      parameters:
+        - in: query
+          name: targetType
+          schema: { $ref: "#/components/schemas/TargetType" }
+      responses:
+        "200":
+          description: Bookmarks
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Bookmark" }
+    post:
+      operationId: createBookmark
+      tags: [me]
+      summary: Save (or no-op if already saved)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateBookmarkBody" }
+      responses:
+        "200":
+          description: Bookmark
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Bookmark" }
+    delete:
+      operationId: deleteBookmark
+      tags: [me]
+      summary: Remove a bookmark
+      parameters:
+        - { in: query, name: targetType, required: true, schema: { $ref: "#/components/schemas/TargetType" } }
+        - { in: query, name: targetId, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /me/badges:
+    get:
+      operationId: listMyBadges
+      tags: [me]
+      summary: List the signed-in user's earned badges
+      responses:
+        "200":
+          description: Badges
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/UserBadge" }
+
+  /me/streak:
+    get:
+      operationId: getMyStreak
+      tags: [me]
+      summary: Get the signed-in user's streak state
+      responses:
+        "200":
+          description: Streak
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Streak" }
+
+  /me/notifications:
+    get:
+      operationId: listMyNotifications
+      tags: [me]
+      summary: List notifications (most-recent 100)
+      parameters:
+        - in: query
+          name: unread
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationsPage" }
+
+  /me/notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [me]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /me/notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [me]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /comments:
+    get:
+      operationId: listComments
+      tags: [social]
+      summary: List visible comments for a target
+      parameters:
+        - { in: query, name: targetType, required: true, schema: { $ref: "#/components/schemas/TargetType" } }
+        - { in: query, name: targetId, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Comment" }
+    post:
+      operationId: createComment
+      tags: [social]
+      summary: Post a comment (1-level threading via parentId)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCommentBody" }
+      responses:
+        "200":
+          description: Created comment
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Comment" }
+        "429":
+          description: Rate-limited
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /comments/{id}:
+    patch:
+      operationId: updateComment
+      tags: [social]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCommentBody" }
+      responses:
+        "200":
+          description: Updated comment
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Comment" }
+    delete:
+      operationId: deleteComment
+      tags: [social]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /comments/{id}/like:
+    post:
+      operationId: likeComment
+      tags: [social]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+    delete:
+      operationId: unlikeComment
+      tags: [social]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /comments/{id}/report:
+    post:
+      operationId: reportComment
+      tags: [social]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string }
+      responses:
+        "200":
+          description: Reported
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /reactions:
+    get:
+      operationId: listReactions
+      tags: [social]
+      summary: Reaction counts + (if logged in) the caller's own reactions
+      parameters:
+        - { in: query, name: targetType, required: true, schema: { $ref: "#/components/schemas/TargetType" } }
+        - { in: query, name: targetId, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Reactions summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReactionsSummary" }
+    post:
+      operationId: createReaction
+      tags: [social]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateReactionBody" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+    delete:
+      operationId: deleteReaction
+      tags: [social]
+      parameters:
+        - { in: query, name: targetType, required: true, schema: { $ref: "#/components/schemas/TargetType" } }
+        - { in: query, name: targetId, required: true, schema: { type: string } }
+        - { in: query, name: kind, required: true, schema: { $ref: "#/components/schemas/ReactionKind" } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
 components:
   schemas:
     HealthStatus:
@@ -1647,3 +1967,204 @@ components:
         startsAt: { type: string, format: date-time }
         endsAt: { type: string, format: date-time }
         status: { type: string }
+
+    # ───────────────────── ENGAGEMENT / SOCIAL schemas ─────────────────────
+
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
+      required: [error]
+
+    TargetType:
+      type: string
+      enum: [destination, church, mezmur, news, marketplace, quiz]
+
+    ReactionKind:
+      type: string
+      enum: [heart, pray, cross, thumb]
+
+    MeStats:
+      type: object
+      properties:
+        currentStreak: { type: integer }
+        longestStreak: { type: integer }
+        totalPoints: { type: integer }
+        lastActiveDate: { type: string }
+        quizzesCompleted: { type: integer }
+        badgesEarned: { type: integer }
+        bookmarksCount: { type: integer }
+      required:
+        [currentStreak, longestStreak, totalPoints, lastActiveDate,
+         quizzesCompleted, badgesEarned, bookmarksCount]
+
+    MeProfile:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string }
+        name: { type: string }
+        role: { type: string, enum: [user, moderator, admin, superadmin] }
+        status: { type: string, enum: [active, suspended, banned] }
+        displayName: { type: string }
+        avatarUrl: { type: string }
+        bio: { type: string }
+        isPublic: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        stats: { $ref: "#/components/schemas/MeStats" }
+      required:
+        [id, email, name, role, status, displayName, avatarUrl, bio,
+         isPublic, createdAt]
+
+    UpdateMeBody:
+      type: object
+      properties:
+        displayName: { type: string }
+        avatarUrl: { type: string }
+        bio: { type: string }
+        isPublic: { type: boolean }
+
+    PublicProfileStats:
+      type: object
+      properties:
+        currentStreak: { type: integer }
+        longestStreak: { type: integer }
+        totalPoints: { type: integer }
+      required: [currentStreak, longestStreak, totalPoints]
+
+    PublicProfile:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        avatarUrl: { type: string }
+        bio: { type: string }
+        role: { type: string, enum: [user, moderator, admin, superadmin] }
+        isPublic: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        stats: { $ref: "#/components/schemas/PublicProfileStats" }
+        badges:
+          type: array
+          items: { $ref: "#/components/schemas/UserBadge" }
+      required: [id, name, avatarUrl, bio, role, isPublic, createdAt, stats, badges]
+
+    Bookmark:
+      type: object
+      properties:
+        id: { type: string }
+        targetType: { $ref: "#/components/schemas/TargetType" }
+        targetId: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, targetType, targetId, createdAt]
+
+    CreateBookmarkBody:
+      type: object
+      properties:
+        targetType: { $ref: "#/components/schemas/TargetType" }
+        targetId: { type: string }
+      required: [targetType, targetId]
+
+    UserBadge:
+      type: object
+      properties:
+        id: { type: string }
+        key: { type: string }
+        name: { type: string }
+        description: { type: string }
+        iconKey: { type: string }
+        tier: { type: string, enum: [bronze, silver, gold, special] }
+        sortOrder: { type: integer }
+        awardedAt:
+          oneOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+      required: [id, key, name, description, iconKey, tier, sortOrder]
+
+    Streak:
+      type: object
+      properties:
+        currentStreak: { type: integer }
+        longestStreak: { type: integer }
+        totalPoints: { type: integer }
+        lastActiveDate: { type: string }
+      required: [currentStreak, longestStreak, totalPoints, lastActiveDate]
+
+    Notification:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string }
+        title: { type: string }
+        body: { type: string }
+        link: { type: string }
+        metadata:
+          type: object
+          additionalProperties: true
+        isRead: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required: [id, kind, title, body, link, metadata, isRead, createdAt]
+
+    NotificationsPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Notification" }
+        unreadCount: { type: integer }
+      required: [items, unreadCount]
+
+    Comment:
+      type: object
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        userName: { type: string }
+        userAvatarUrl: { type: string }
+        targetType: { $ref: "#/components/schemas/TargetType" }
+        targetId: { type: string }
+        parentId:
+          oneOf:
+            - { type: string }
+            - { type: "null" }
+        body: { type: string }
+        likesCount: { type: integer }
+        status: { type: string, enum: [visible, hidden, deleted] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required:
+        [id, userId, userName, userAvatarUrl, targetType, targetId,
+         body, likesCount, status, createdAt, updatedAt]
+
+    CreateCommentBody:
+      type: object
+      properties:
+        targetType: { $ref: "#/components/schemas/TargetType" }
+        targetId: { type: string }
+        parentId: { type: string }
+        body: { type: string, minLength: 1, maxLength: 2000 }
+      required: [targetType, targetId, body]
+
+    UpdateCommentBody:
+      type: object
+      properties:
+        body: { type: string, minLength: 1, maxLength: 2000 }
+      required: [body]
+
+    ReactionsSummary:
+      type: object
+      properties:
+        summary:
+          type: object
+          additionalProperties: { type: integer }
+        mine:
+          type: array
+          items: { type: string }
+      required: [summary, mine]
+
+    CreateReactionBody:
+      type: object
+      properties:
+        targetType: { $ref: "#/components/schemas/TargetType" }
+        targetId: { type: string }
+        kind: { $ref: "#/components/schemas/ReactionKind" }
+      required: [targetType, targetId, kind]

@@ -9,6 +9,8 @@ import mezmursRouter from "./mezmurs";
 import newsRouter from "./news";
 import adminRouter from "./admin";
 import qaRouter from "./qa";
+import socialRouter from "./social";
+import calendarRouter from "./calendar";
 
 const router: IRouter = Router();
 
@@ -22,5 +24,7 @@ router.use(mezmursRouter);
 router.use(newsRouter);
 router.use(adminRouter);
 router.use(qaRouter);
+router.use(socialRouter);
+router.use(calendarRouter);
 
 export default router;

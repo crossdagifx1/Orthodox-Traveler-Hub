@@ -282,7 +282,7 @@ router.get("/admin/audit", requireAdmin, async (req, res) => {
     .limit(limit);
 
   res.json(
-    rows.map((r) => ({
+    rows.map((r: any) => ({
       id: String(r.id),
       actorId: r.actorId ?? null,
       actorEmail: r.actorEmail,

@@ -20,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/AuthProvider";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { EngagementSection } from "@/components/engagement/EngagementSection";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export function QuizDetail() {
   const params = useParams<{ id: string }>();
@@ -69,6 +71,11 @@ export function QuizDetail() {
 
   return (
     <div className="pb-24">
+      <SeoHead
+        title={quiz.title}
+        description={quiz.description?.slice(0, 160) || `${quiz.category} quiz with ${questions.length} questions worth ${quiz.pointsTotal} points.`}
+        type="article"
+      />
       <div className="px-4 pt-4">
         <div className="flex items-center justify-between mb-3">
           <Link href="/learn">
@@ -174,6 +181,8 @@ export function QuizDetail() {
           </div>
         ) : null}
       </div>
+
+      <EngagementSection targetType="quiz" targetId={id} />
     </div>
   );
 }

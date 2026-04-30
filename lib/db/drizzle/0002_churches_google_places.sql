@@ -1,0 +1,1 @@
+-- Migration removed - Google Places fields reverted from schema

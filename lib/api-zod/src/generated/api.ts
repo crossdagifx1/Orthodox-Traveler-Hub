@@ -1450,3 +1450,431 @@ export const QaDeleteChallengeParams = zod.object({
 export const QaDeleteChallengeResponse = zod.object({
   ok: zod.boolean(),
 });
+
+/**
+ * @summary Get the signed-in user's full profile (with stats)
+ */
+export const GetMyProfileResponse = zod.object({
+  id: zod.string(),
+  email: zod.string(),
+  name: zod.string(),
+  role: zod.enum(["user", "moderator", "admin", "superadmin"]),
+  status: zod.enum(["active", "suspended", "banned"]),
+  displayName: zod.string(),
+  avatarUrl: zod.string(),
+  bio: zod.string(),
+  isPublic: zod.boolean(),
+  createdAt: zod.coerce.date(),
+  stats: zod
+    .object({
+      currentStreak: zod.number(),
+      longestStreak: zod.number(),
+      totalPoints: zod.number(),
+      lastActiveDate: zod.string(),
+      quizzesCompleted: zod.number(),
+      badgesEarned: zod.number(),
+      bookmarksCount: zod.number(),
+    })
+    .optional(),
+});
+
+/**
+ * @summary Update displayName / bio / avatarUrl / isPublic
+ */
+export const UpdateMyProfileBody = zod.object({
+  displayName: zod.string().optional(),
+  avatarUrl: zod.string().optional(),
+  bio: zod.string().optional(),
+  isPublic: zod.boolean().optional(),
+});
+
+export const UpdateMyProfileResponse = zod.object({
+  id: zod.string(),
+  email: zod.string(),
+  name: zod.string(),
+  role: zod.enum(["user", "moderator", "admin", "superadmin"]),
+  status: zod.enum(["active", "suspended", "banned"]),
+  displayName: zod.string(),
+  avatarUrl: zod.string(),
+  bio: zod.string(),
+  isPublic: zod.boolean(),
+  createdAt: zod.coerce.date(),
+  stats: zod
+    .object({
+      currentStreak: zod.number(),
+      longestStreak: zod.number(),
+      totalPoints: zod.number(),
+      lastActiveDate: zod.string(),
+      quizzesCompleted: zod.number(),
+      badgesEarned: zod.number(),
+      bookmarksCount: zod.number(),
+    })
+    .optional(),
+});
+
+/**
+ * @summary Public read-only profile (404 if not public)
+ */
+export const GetPublicProfileParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetPublicProfileResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  avatarUrl: zod.string(),
+  bio: zod.string(),
+  role: zod.enum(["user", "moderator", "admin", "superadmin"]),
+  isPublic: zod.boolean(),
+  createdAt: zod.coerce.date(),
+  stats: zod.object({
+    currentStreak: zod.number(),
+    longestStreak: zod.number(),
+    totalPoints: zod.number(),
+  }),
+  badges: zod.array(
+    zod.object({
+      id: zod.string(),
+      key: zod.string(),
+      name: zod.string(),
+      description: zod.string(),
+      iconKey: zod.string(),
+      tier: zod.enum(["bronze", "silver", "gold", "special"]),
+      sortOrder: zod.number(),
+      awardedAt: zod.union([zod.coerce.date(), zod.null()]).optional(),
+    }),
+  ),
+});
+
+/**
+ * @summary List the signed-in user's bookmarks
+ */
+export const ListMyBookmarksQueryParams = zod.object({
+  targetType: zod
+    .enum(["destination", "church", "mezmur", "news", "marketplace", "quiz"])
+    .optional(),
+});
+
+export const ListMyBookmarksResponseItem = zod.object({
+  id: zod.string(),
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const ListMyBookmarksResponse = zod.array(ListMyBookmarksResponseItem);
+
+/**
+ * @summary Save (or no-op if already saved)
+ */
+export const CreateBookmarkBody = zod.object({
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.string(),
+});
+
+export const CreateBookmarkResponse = zod.object({
+  id: zod.string(),
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Remove a bookmark
+ */
+export const DeleteBookmarkQueryParams = zod.object({
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.coerce.string(),
+});
+
+export const DeleteBookmarkResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+/**
+ * @summary List the signed-in user's earned badges
+ */
+export const ListMyBadgesResponseItem = zod.object({
+  id: zod.string(),
+  key: zod.string(),
+  name: zod.string(),
+  description: zod.string(),
+  iconKey: zod.string(),
+  tier: zod.enum(["bronze", "silver", "gold", "special"]),
+  sortOrder: zod.number(),
+  awardedAt: zod.union([zod.coerce.date(), zod.null()]).optional(),
+});
+export const ListMyBadgesResponse = zod.array(ListMyBadgesResponseItem);
+
+/**
+ * @summary Get the signed-in user's streak state
+ */
+export const GetMyStreakResponse = zod.object({
+  currentStreak: zod.number(),
+  longestStreak: zod.number(),
+  totalPoints: zod.number(),
+  lastActiveDate: zod.string(),
+});
+
+/**
+ * @summary List notifications (most-recent 100)
+ */
+export const ListMyNotificationsQueryParams = zod.object({
+  unread: zod.coerce.boolean().optional(),
+});
+
+export const ListMyNotificationsResponse = zod.object({
+  items: zod.array(
+    zod.object({
+      id: zod.string(),
+      kind: zod.string(),
+      title: zod.string(),
+      body: zod.string(),
+      link: zod.string(),
+      metadata: zod.record(zod.string(), zod.unknown()),
+      isRead: zod.boolean(),
+      createdAt: zod.coerce.date(),
+    }),
+  ),
+  unreadCount: zod.number(),
+});
+
+export const MarkAllNotificationsReadResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+export const MarkNotificationReadParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const MarkNotificationReadResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+/**
+ * @summary List visible comments for a target
+ */
+export const ListCommentsQueryParams = zod.object({
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.coerce.string(),
+});
+
+export const ListCommentsResponseItem = zod.object({
+  id: zod.string(),
+  userId: zod.string(),
+  userName: zod.string(),
+  userAvatarUrl: zod.string(),
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.string(),
+  parentId: zod.union([zod.string(), zod.null()]).optional(),
+  body: zod.string(),
+  likesCount: zod.number(),
+  status: zod.enum(["visible", "hidden", "deleted"]),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const ListCommentsResponse = zod.array(ListCommentsResponseItem);
+
+/**
+ * @summary Post a comment (1-level threading via parentId)
+ */
+export const createCommentBodyBodyMax = 2000;
+
+export const CreateCommentBody = zod.object({
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.string(),
+  parentId: zod.string().optional(),
+  body: zod.string().min(1).max(createCommentBodyBodyMax),
+});
+
+export const CreateCommentResponse = zod.object({
+  id: zod.string(),
+  userId: zod.string(),
+  userName: zod.string(),
+  userAvatarUrl: zod.string(),
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.string(),
+  parentId: zod.union([zod.string(), zod.null()]).optional(),
+  body: zod.string(),
+  likesCount: zod.number(),
+  status: zod.enum(["visible", "hidden", "deleted"]),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+export const UpdateCommentParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const updateCommentBodyBodyMax = 2000;
+
+export const UpdateCommentBody = zod.object({
+  body: zod.string().min(1).max(updateCommentBodyBodyMax),
+});
+
+export const UpdateCommentResponse = zod.object({
+  id: zod.string(),
+  userId: zod.string(),
+  userName: zod.string(),
+  userAvatarUrl: zod.string(),
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.string(),
+  parentId: zod.union([zod.string(), zod.null()]).optional(),
+  body: zod.string(),
+  likesCount: zod.number(),
+  status: zod.enum(["visible", "hidden", "deleted"]),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+export const DeleteCommentParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const DeleteCommentResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+export const LikeCommentParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const LikeCommentResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+export const UnlikeCommentParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const UnlikeCommentResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+export const ReportCommentParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const ReportCommentBody = zod.object({
+  reason: zod.string().optional(),
+});
+
+export const ReportCommentResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+/**
+ * @summary Reaction counts + (if logged in) the caller's own reactions
+ */
+export const ListReactionsQueryParams = zod.object({
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.coerce.string(),
+});
+
+export const ListReactionsResponse = zod.object({
+  summary: zod.record(zod.string(), zod.number()),
+  mine: zod.array(zod.string()),
+});
+
+export const CreateReactionBody = zod.object({
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.string(),
+  kind: zod.enum(["heart", "pray", "cross", "thumb"]),
+});
+
+export const CreateReactionResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+export const DeleteReactionQueryParams = zod.object({
+  targetType: zod.enum([
+    "destination",
+    "church",
+    "mezmur",
+    "news",
+    "marketplace",
+    "quiz",
+  ]),
+  targetId: zod.coerce.string(),
+  kind: zod.enum(["heart", "pray", "cross", "thumb"]),
+});
+
+export const DeleteReactionResponse = zod.object({
+  ok: zod.boolean(),
+});

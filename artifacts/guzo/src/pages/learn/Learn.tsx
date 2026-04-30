@@ -182,7 +182,7 @@ export function Learn() {
         ) : null}
 
         {/* Mini-leaderboard preview */}
-        {leaderboard && leaderboard.entries.length > 0 ? (
+        {leaderboard && Array.isArray(leaderboard.entries) && leaderboard.entries.length > 0 ? (
           <section className="rounded-2xl border border-border/60 bg-card p-3" data-testid="section-leaderboard-preview">
             <div className="flex items-center justify-between mb-2 px-1">
               <div className="flex items-center gap-2">
@@ -194,7 +194,7 @@ export function Learn() {
               </Link>
             </div>
             <ol className="space-y-1">
-              {leaderboard.entries.slice(0, 5).map((e) => (
+              {(Array.isArray(leaderboard.entries) ? leaderboard.entries : []).slice(0, 5).map((e) => (
                 <li
                   key={e.userId}
                   className="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-muted/50"
@@ -244,7 +244,7 @@ export function Learn() {
                 <div key={i} className="h-24 rounded-2xl bg-muted animate-pulse" />
               ))}
             </div>
-          ) : quizzes && quizzes.length > 0 ? (
+          ) : Array.isArray(quizzes) && quizzes.length > 0 ? (
             <div className="grid gap-2">
               {quizzes.map((q) => (
                 <QuizCard key={q.id} quiz={q} />

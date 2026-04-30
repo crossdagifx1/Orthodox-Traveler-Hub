@@ -58,7 +58,7 @@ export function Mezmurs() {
   };
 
   const sorted = useMemo(() => {
-    const arr = [...(mezmurs ?? [])];
+    const arr = [...(Array.isArray(mezmurs) ? mezmurs : [])];
     switch (sort) {
       case "newest":
         arr.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
@@ -119,7 +119,7 @@ export function Mezmurs() {
             {t("common.trending")}
           </div>
           <div className="flex gap-3 overflow-x-auto pb-3 pr-4 -mr-4 scrollbar-hide">
-            {(trending ?? []).slice(0, 8).map((m) => (
+            {(Array.isArray(trending) ? trending : []).slice(0, 8).map((m) => (
               <button
                 key={m.id}
                 onClick={() => handlePlay(m)}

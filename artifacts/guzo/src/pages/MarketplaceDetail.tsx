@@ -26,6 +26,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/AuthProvider";
 import { useWishlist } from "@/providers/WishlistProvider";
 import { cn } from "@/lib/utils";
+import { EngagementSection } from "@/components/engagement/EngagementSection";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export function MarketplaceDetail() {
   const { t } = useTranslation();
@@ -45,7 +47,7 @@ export function MarketplaceDetail() {
 
   const related = useMemo(() => {
     if (!item || !allItems) return [];
-    return allItems
+    return (Array.isArray(allItems) ? allItems : [])
       .filter((i) => i.id !== item.id && i.category === item.category)
       .slice(0, 6);
   }, [item, allItems]);
@@ -82,6 +84,12 @@ export function MarketplaceDetail() {
 
   return (
     <div className="pb-32 bg-background min-h-full">
+      <SeoHead
+        title={item.title}
+        description={item.description?.slice(0, 160) || `${item.category} • ${item.condition ?? ""}`.trim()}
+        image={item.imageUrl}
+        type="product"
+      />
       {/* Image hero */}
       <div className="relative w-full aspect-square bg-gradient-to-br from-muted/40 to-card">
         <img
@@ -294,6 +302,8 @@ export function MarketplaceDetail() {
           </Button>
         </div>
       </div>
+
+      <EngagementSection targetType="marketplace" targetId={id} />
     </div>
   );
 }

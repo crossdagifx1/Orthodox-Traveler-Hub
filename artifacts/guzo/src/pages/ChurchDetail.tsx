@@ -2,6 +2,8 @@ import { useGetChurch, getGetChurchQueryKey } from "@workspace/api-client-react"
 import { useRoute } from "wouter";
 import { MapPin, Phone, Globe, Clock, User as Priest, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EngagementSection } from "@/components/engagement/EngagementSection";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export function ChurchDetail() {
   const [, params] = useRoute("/churches/:id");
@@ -16,6 +18,12 @@ export function ChurchDetail() {
 
   return (
     <div className="pb-24">
+      <SeoHead
+        title={church.name}
+        description={church.description?.slice(0, 160) || `${church.address ?? ""}${church.city ? `, ${church.city}` : ""}${church.country ? `, ${church.country}` : ""}`.trim()}
+        image={church.imageUrl}
+        type="profile"
+      />
       <div className="relative w-full aspect-[4/3] md:aspect-video">
         <img src={church.imageUrl || "https://placehold.co/800x600"} alt={church.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-background" />
@@ -73,6 +81,8 @@ export function ChurchDetail() {
           )}
         </div>
       </div>
+
+      <EngagementSection targetType="church" targetId={id} />
     </div>
   );
 }

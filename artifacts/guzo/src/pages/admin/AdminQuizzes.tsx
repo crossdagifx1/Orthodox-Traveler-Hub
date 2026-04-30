@@ -185,7 +185,7 @@ export function AdminQuizzes() {
           </div>
         ) : (
           <div className="space-y-2">
-            {quizzes.map((q) => {
+            {(Array.isArray(quizzes) ? quizzes : []).map((q) => {
               const canEdit =
                 user?.role === "admin" ||
                 user?.role === "superadmin" ||

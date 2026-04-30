@@ -63,7 +63,7 @@ export function Leaderboard() {
 
       <div className="px-4 pt-4">
         {/* Top 3 podium */}
-        {data && data.entries.length >= 3 ? (
+        {data && Array.isArray(data.entries) && data.entries.length >= 3 ? (
           <div className="grid grid-cols-3 gap-2 mb-5 items-end">
             <Podium entry={data.entries[1]} place={2} />
             <Podium entry={data.entries[0]} place={1} />
@@ -77,14 +77,14 @@ export function Leaderboard() {
               <div key={i} className="h-14 rounded-2xl bg-muted animate-pulse" />
             ))}
           </div>
-        ) : !data || data.entries.length === 0 ? (
+        ) : !data || !Array.isArray(data.entries) || data.entries.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-8 text-center">
             <Trophy className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
             <p className="text-sm text-muted-foreground">{t("learn.lbEmpty")}</p>
           </div>
         ) : (
           <ol className="space-y-1.5">
-            {data.entries.map((e) => (
+            {(Array.isArray(data?.entries) ? data.entries : []).map((e) => (
               <li
                 key={e.userId}
                 data-testid={`lb-row-${e.rank}`}

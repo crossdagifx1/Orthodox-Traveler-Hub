@@ -29,6 +29,8 @@ import { useTranslation } from "react-i18next";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { EngagementSection } from "@/components/engagement/EngagementSection";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export function DestinationDetail() {
   const { t } = useTranslation();
@@ -52,14 +54,14 @@ export function DestinationDetail() {
 
   const relatedChurches = useMemo(() => {
     if (!dest || !allChurches) return [];
-    return allChurches
+    return (Array.isArray(allChurches) ? allChurches : [])
       .filter((c) => c.country === dest.country)
       .slice(0, 3);
   }, [dest, allChurches]);
 
   const relatedDestinations = useMemo(() => {
     if (!dest || !allDestinations) return [];
-    return allDestinations
+    return (Array.isArray(allDestinations) ? allDestinations : [])
       .filter((d) => d.id !== dest.id && (d.region === dest.region || d.country === dest.country))
       .slice(0, 4);
   }, [dest, allDestinations]);
@@ -96,6 +98,12 @@ export function DestinationDetail() {
     <div className="pb-24 bg-background min-h-full">
       {/* Hero */}
       <div className="relative w-full aspect-[4/5] max-h-[600px]">
+        <SeoHead
+          title={dest.name}
+          description={dest.shortDescription || dest.description?.slice(0, 160)}
+          image={dest.imageUrl}
+          type="article"
+        />
         <img
           src={dest.imageUrl || "https://placehold.co/800x1000"}
           alt={dest.name}
@@ -360,6 +368,8 @@ export function DestinationDetail() {
           <img src={lightbox} alt="" className="max-w-full max-h-full object-contain rounded-xl" />
         </button>
       )}
+
+      <EngagementSection targetType="destination" targetId={id} />
     </div>
   );
 }

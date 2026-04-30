@@ -171,7 +171,7 @@ export function Home() {
           </Link>
         </div>
         <div className="flex gap-4 overflow-x-auto pb-4 snap-x pr-4 -mr-4 scrollbar-hide">
-          {(featuredDestinations ?? []).map((dest) => (
+          {(Array.isArray(featuredDestinations) ? featuredDestinations : []).map((dest) => (
             <Link key={dest.id} href={`/destinations/${dest.id}`}>
               <Card
                 className="w-[280px] shrink-0 snap-start rounded-2xl overflow-hidden cursor-pointer hover-elevate transition-transform active:scale-95 group border-0 shadow-md"
@@ -213,7 +213,7 @@ export function Home() {
           </Link>
         </div>
         <div className="space-y-2">
-          {(trendingMezmurs ?? []).slice(0, 4).map((m, i) => (
+          {(Array.isArray(trendingMezmurs) ? trendingMezmurs : []).slice(0, 4).map((m, i) => (
             <Link key={m.id} href={`/mezmurs/${m.id}`}>
               <div
                 className="flex items-center gap-3 bg-card rounded-2xl p-2.5 border border-border/60 hover-elevate cursor-pointer"
@@ -257,7 +257,7 @@ export function Home() {
             </Link>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-4 pr-4 -mr-4 scrollbar-hide">
-            {(featuredItems ?? []).slice(0, 6).map((item) => (
+            {(Array.isArray(featuredItems) ? featuredItems : []).slice(0, 6).map((item) => (
               <Link key={item.id} href={`/marketplace/${item.id}`}>
                 <Card
                   className="w-[160px] shrink-0 rounded-2xl overflow-hidden cursor-pointer hover-elevate group border border-border/60 shadow-sm"
@@ -302,7 +302,7 @@ export function Home() {
           </Link>
         </div>
         <div className="space-y-3">
-          {(latestNews ?? []).slice(0, 3).map((post) => (
+          {(Array.isArray(latestNews) ? latestNews : []).slice(0, 3).map((post) => (
             <Link key={post.id} href={`/news/${post.id}`}>
               <article
                 className="flex gap-3 bg-card rounded-2xl p-3 border border-border/60 hover-elevate cursor-pointer"

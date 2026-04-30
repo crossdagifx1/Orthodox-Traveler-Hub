@@ -22,6 +22,14 @@ export const usersTable = pgTable("users", {
   status: varchar("status", { length: 32 }).notNull().default("active"),
   suspendedUntil: timestamp("suspended_until", { withTimezone: true }),
   notes: text("notes").notNull().default(""),
+  /** Public display name (overrides `name` on profile/leaderboard if set). */
+  displayName: varchar("display_name", { length: 255 }).notNull().default(""),
+  /** Avatar URL — uploaded image or external URL. */
+  avatarUrl: text("avatar_url").notNull().default(""),
+  /** Short bio shown on the public profile. */
+  bio: text("bio").notNull().default(""),
+  /** When false, /u/:id returns 404; the user only appears in private contexts. */
+  isPublic: boolean("is_public").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 export type User = typeof usersTable.$inferSelect;
@@ -280,3 +288,200 @@ export const quizChallengesTable = pgTable("quiz_challenges", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 export type QuizChallenge = typeof quizChallengesTable.$inferSelect;
+
+/**
+ * ──────────────────────── ENGAGEMENT / SOCIAL ─────────────────────────
+ * Bookmarks, badges, streaks, comments, reactions, notifications.
+ *
+ * `target_type` is a stable string discriminator across these tables
+ * (e.g. 'destination' | 'church' | 'mezmur' | 'news' | 'marketplace' | 'quiz').
+ */
+
+export const TARGET_TYPES = [
+  "destination",
+  "church",
+  "mezmur",
+  "news",
+  "marketplace",
+  "quiz",
+] as const;
+export type TargetType = (typeof TARGET_TYPES)[number];
+
+/** Saved / hearted items. One row per (user, target_type, target_id). */
+export const bookmarksTable = pgTable(
+  "bookmarks",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    targetType: varchar("target_type", { length: 32 }).notNull(),
+    targetId: varchar("target_id", { length: 64 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniq: uniqueIndex("bookmarks_user_target_uniq").on(
+      t.userId,
+      t.targetType,
+      t.targetId,
+    ),
+    userIdx: index("bookmarks_user_idx").on(t.userId, t.createdAt),
+  }),
+);
+export type Bookmark = typeof bookmarksTable.$inferSelect;
+
+/**
+ * Catalogue of all possible badges. Seeded by `init.ts`. `key` is the
+ * stable identifier referenced by the awarding helpers
+ * (e.g. 'first_quiz', 'streak_7', 'pilgrim', 'scholar', 'hymn_lover').
+ */
+export const badgesTable = pgTable("badges", {
+  id: serial("id").primaryKey(),
+  key: varchar("key", { length: 64 }).notNull().unique(),
+  name: varchar("name", { length: 128 }).notNull(),
+  description: text("description").notNull().default(""),
+  /** Icon name in our lucide / custom icon set; e.g. 'flame', 'crown'. */
+  iconKey: varchar("icon_key", { length: 64 }).notNull().default("award"),
+  /** Cosmetic tier: 'bronze' | 'silver' | 'gold' | 'special'. */
+  tier: varchar("tier", { length: 16 }).notNull().default("bronze"),
+  /** Higher numbers sort earlier on the profile. */
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export type Badge = typeof badgesTable.$inferSelect;
+
+/** Awarded-badges junction. One row per (user, badge). */
+export const userBadgesTable = pgTable(
+  "user_badges",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    badgeId: integer("badge_id").notNull(),
+    awardedAt: timestamp("awarded_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniq: uniqueIndex("user_badges_user_badge_uniq").on(t.userId, t.badgeId),
+    userIdx: index("user_badges_user_idx").on(t.userId, t.awardedAt),
+  }),
+);
+export type UserBadge = typeof userBadgesTable.$inferSelect;
+
+/**
+ * Daily-activity streaks. One row per user. `lastActiveDate` is the
+ * Ethiopian-calendar date string (YYYY-MM-DD in Ethiopian) on which
+ * the user last performed any authenticated mutation.
+ */
+export const streaksTable = pgTable("streaks", {
+  userId: integer("user_id").primaryKey(),
+  currentStreak: integer("current_streak").notNull().default(0),
+  longestStreak: integer("longest_streak").notNull().default(0),
+  totalPoints: integer("total_points").notNull().default(0),
+  /** YYYY-MM-DD in the Ethiopian calendar. */
+  lastActiveDate: varchar("last_active_date", { length: 16 }).notNull().default(""),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export type Streak = typeof streaksTable.$inferSelect;
+
+/**
+ * Threaded comments (1 level deep). `parentId` null = top-level; otherwise
+ * points at another comment with the same target_type+target_id.
+ * `status`: 'visible' | 'hidden' | 'deleted'.
+ */
+export const commentsTable = pgTable(
+  "comments",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    userName: varchar("user_name", { length: 255 }).notNull().default(""),
+    userAvatarUrl: text("user_avatar_url").notNull().default(""),
+    targetType: varchar("target_type", { length: 32 }).notNull(),
+    targetId: varchar("target_id", { length: 64 }).notNull(),
+    parentId: integer("parent_id"),
+    body: text("body").notNull(),
+    likesCount: integer("likes_count").notNull().default(0),
+    status: varchar("status", { length: 16 }).notNull().default("visible"),
+    /** When non-zero, count of pending un-resolved reports. */
+    reportsCount: integer("reports_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    targetIdx: index("comments_target_idx").on(t.targetType, t.targetId, t.createdAt),
+    userIdx: index("comments_user_idx").on(t.userId, t.createdAt),
+    parentIdx: index("comments_parent_idx").on(t.parentId),
+  }),
+);
+export type Comment = typeof commentsTable.$inferSelect;
+
+/** Per-user "like" on a comment. One row per (comment, user). */
+export const commentLikesTable = pgTable(
+  "comment_likes",
+  {
+    id: serial("id").primaryKey(),
+    commentId: integer("comment_id").notNull(),
+    userId: integer("user_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniq: uniqueIndex("comment_likes_comment_user_uniq").on(
+      t.commentId,
+      t.userId,
+    ),
+  }),
+);
+export type CommentLike = typeof commentLikesTable.$inferSelect;
+
+/**
+ * Emoji reactions on news posts and mezmurs.
+ * `kind`: 'heart' | 'pray' | 'cross' | 'thumb'.
+ * One row per (user, target_type, target_id, kind) — a user may apply
+ * multiple distinct reactions on the same target.
+ */
+export const REACTION_KINDS = ["heart", "pray", "cross", "thumb"] as const;
+export type ReactionKind = (typeof REACTION_KINDS)[number];
+
+export const reactionsTable = pgTable(
+  "reactions",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    targetType: varchar("target_type", { length: 32 }).notNull(),
+    targetId: varchar("target_id", { length: 64 }).notNull(),
+    kind: varchar("kind", { length: 16 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniq: uniqueIndex("reactions_user_target_kind_uniq").on(
+      t.userId,
+      t.targetType,
+      t.targetId,
+      t.kind,
+    ),
+    targetIdx: index("reactions_target_idx").on(t.targetType, t.targetId),
+  }),
+);
+export type Reaction = typeof reactionsTable.$inferSelect;
+
+/**
+ * In-app notifications. `kind` examples:
+ *   'badge_awarded' | 'comment_reply' | 'comment_liked' |
+ *   'challenge_new' | 'account_status'.
+ */
+export const notificationsTable = pgTable(
+  "notifications",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    kind: varchar("kind", { length: 32 }).notNull(),
+    title: text("title").notNull(),
+    body: text("body").notNull().default(""),
+    /** Optional in-app deep-link path. */
+    link: text("link").notNull().default(""),
+    /** Free-form metadata (badgeId, commentId, etc.). */
+    metadata: jsonb("metadata").notNull().default({}),
+    isRead: boolean("is_read").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    userIdx: index("notifications_user_idx").on(t.userId, t.isRead, t.createdAt),
+  }),
+);
+export type Notification = typeof notificationsTable.$inferSelect;

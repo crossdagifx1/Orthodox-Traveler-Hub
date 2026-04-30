@@ -682,6 +682,219 @@ export interface UpdateChallengeBody {
   status?: string;
 }
 
+export interface ErrorResponse {
+  error: string;
+}
+
+export type TargetType = (typeof TargetType)[keyof typeof TargetType];
+
+export const TargetType = {
+  destination: "destination",
+  church: "church",
+  mezmur: "mezmur",
+  news: "news",
+  marketplace: "marketplace",
+  quiz: "quiz",
+} as const;
+
+export type ReactionKind = (typeof ReactionKind)[keyof typeof ReactionKind];
+
+export const ReactionKind = {
+  heart: "heart",
+  pray: "pray",
+  cross: "cross",
+  thumb: "thumb",
+} as const;
+
+export interface MeStats {
+  currentStreak: number;
+  longestStreak: number;
+  totalPoints: number;
+  lastActiveDate: string;
+  quizzesCompleted: number;
+  badgesEarned: number;
+  bookmarksCount: number;
+}
+
+export type MeProfileRole = (typeof MeProfileRole)[keyof typeof MeProfileRole];
+
+export const MeProfileRole = {
+  user: "user",
+  moderator: "moderator",
+  admin: "admin",
+  superadmin: "superadmin",
+} as const;
+
+export type MeProfileStatus =
+  (typeof MeProfileStatus)[keyof typeof MeProfileStatus];
+
+export const MeProfileStatus = {
+  active: "active",
+  suspended: "suspended",
+  banned: "banned",
+} as const;
+
+export interface MeProfile {
+  id: string;
+  email: string;
+  name: string;
+  role: MeProfileRole;
+  status: MeProfileStatus;
+  displayName: string;
+  avatarUrl: string;
+  bio: string;
+  isPublic: boolean;
+  createdAt: string;
+  stats?: MeStats;
+}
+
+export interface UpdateMeBody {
+  displayName?: string;
+  avatarUrl?: string;
+  bio?: string;
+  isPublic?: boolean;
+}
+
+export interface PublicProfileStats {
+  currentStreak: number;
+  longestStreak: number;
+  totalPoints: number;
+}
+
+export type PublicProfileRole =
+  (typeof PublicProfileRole)[keyof typeof PublicProfileRole];
+
+export const PublicProfileRole = {
+  user: "user",
+  moderator: "moderator",
+  admin: "admin",
+  superadmin: "superadmin",
+} as const;
+
+export type UserBadgeTier = (typeof UserBadgeTier)[keyof typeof UserBadgeTier];
+
+export const UserBadgeTier = {
+  bronze: "bronze",
+  silver: "silver",
+  gold: "gold",
+  special: "special",
+} as const;
+
+export interface UserBadge {
+  id: string;
+  key: string;
+  name: string;
+  description: string;
+  iconKey: string;
+  tier: UserBadgeTier;
+  sortOrder: number;
+  awardedAt?: string | null;
+}
+
+export interface PublicProfile {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  bio: string;
+  role: PublicProfileRole;
+  isPublic: boolean;
+  createdAt: string;
+  stats: PublicProfileStats;
+  badges: UserBadge[];
+}
+
+export interface Bookmark {
+  id: string;
+  targetType: TargetType;
+  targetId: string;
+  createdAt: string;
+}
+
+export interface CreateBookmarkBody {
+  targetType: TargetType;
+  targetId: string;
+}
+
+export interface Streak {
+  currentStreak: number;
+  longestStreak: number;
+  totalPoints: number;
+  lastActiveDate: string;
+}
+
+export type NotificationMetadata = { [key: string]: unknown };
+
+export interface Notification {
+  id: string;
+  kind: string;
+  title: string;
+  body: string;
+  link: string;
+  metadata: NotificationMetadata;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface NotificationsPage {
+  items: Notification[];
+  unreadCount: number;
+}
+
+export type CommentStatus = (typeof CommentStatus)[keyof typeof CommentStatus];
+
+export const CommentStatus = {
+  visible: "visible",
+  hidden: "hidden",
+  deleted: "deleted",
+} as const;
+
+export interface Comment {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatarUrl: string;
+  targetType: TargetType;
+  targetId: string;
+  parentId?: string | null;
+  body: string;
+  likesCount: number;
+  status: CommentStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCommentBody {
+  targetType: TargetType;
+  targetId: string;
+  parentId?: string;
+  /**
+   * @minLength 1
+   * @maxLength 2000
+   */
+  body: string;
+}
+
+export interface UpdateCommentBody {
+  /**
+   * @minLength 1
+   * @maxLength 2000
+   */
+  body: string;
+}
+
+export type ReactionsSummarySummary = { [key: string]: number };
+
+export interface ReactionsSummary {
+  summary: ReactionsSummarySummary;
+  mine: string[];
+}
+
+export interface CreateReactionBody {
+  targetType: TargetType;
+  targetId: string;
+  kind: ReactionKind;
+}
+
 export type Login401 = {
   error: string;
 };
@@ -757,3 +970,36 @@ export const QaLeaderboardWindow = {
   month: "month",
   all: "all",
 } as const;
+
+export type ListMyBookmarksParams = {
+  targetType?: TargetType;
+};
+
+export type DeleteBookmarkParams = {
+  targetType: TargetType;
+  targetId: string;
+};
+
+export type ListMyNotificationsParams = {
+  unread?: boolean;
+};
+
+export type ListCommentsParams = {
+  targetType: TargetType;
+  targetId: string;
+};
+
+export type ReportCommentBody = {
+  reason?: string;
+};
+
+export type ListReactionsParams = {
+  targetType: TargetType;
+  targetId: string;
+};
+
+export type DeleteReactionParams = {
+  targetType: TargetType;
+  targetId: string;
+  kind: ReactionKind;
+};

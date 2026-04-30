@@ -10,6 +10,8 @@ import {
 import { and, asc, desc, eq, gte, ilike, inArray, lte, or, sql } from "drizzle-orm";
 import { requireAuth, requireRole, hasRoleAtLeast } from "../lib/auth";
 import { recordAudit } from "../lib/audit";
+import { bumpStreak, addPoints } from "../lib/streak";
+import { evaluateQuizBadges, evaluateStreakBadges } from "../lib/badges";
 import { randomBytes } from "node:crypto";
 
 const router: IRouter = Router();
@@ -436,7 +438,7 @@ router.delete("/qa/quizzes/:id", requireRole("moderator"), async (req, res) => {
   if (aIds.length) {
     await db
       .delete(quizAnswersTable)
-      .where(inArray(quizAnswersTable.attemptId, aIds.map((x) => x.id)));
+      .where(inArray(quizAnswersTable.attemptId, aIds.map((x: any) => x.id)));
     await db.delete(quizAttemptsTable).where(eq(quizAttemptsTable.quizId, row.id));
   }
   if (qIds.length) {
@@ -600,7 +602,7 @@ router.post("/qa/quizzes/:id/start", requireAuth, async (req, res) => {
     return;
   }
   const actor = req.user!;
-  const totalPoints = questions.reduce((s, q) => s + (q.points ?? 0), 0);
+  const totalPoints = questions.reduce((s: number, q: typeof quizQuestionsTable.$inferSelect) => s + (q.points ?? 0), 0);
   const [attempt] = await db
     .insert(quizAttemptsTable)
     .values({
@@ -625,7 +627,7 @@ router.post("/qa/attempts/:id/answer", requireAuth, async (req, res) => {
   const questionId = Number(body.questionId);
 
   // Single transaction with status revalidation to prevent races with /finish.
-  const result = await db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx: any) => {
     const [attempt] = await tx
       .select()
       .from(quizAttemptsTable)
@@ -701,7 +703,7 @@ router.post("/qa/attempts/:id/answer", requireAuth, async (req, res) => {
 router.post("/qa/attempts/:id/finish", requireAuth, async (req, res) => {
   const id = Number(req.params.id);
 
-  const result = await db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx: any) => {
     const [attempt] = await tx
       .select()
       .from(quizAttemptsTable)
@@ -732,8 +734,29 @@ router.post("/qa/attempts/:id/finish", requireAuth, async (req, res) => {
       .update(quizzesTable)
       .set({ attemptsCount: sql`${quizzesTable.attemptsCount} + 1` })
       .where(eq(quizzesTable.id, attempt.quizId));
-    return { http: 200, body: serializeAttempt(updates[0]!) as any };
+    return { http: 200, body: serializeAttempt(updates[0]!) as any, finishedAttempt: updates[0]! };
   });
+  // Side-effects after the txn commits: streak bump, points, and badge evaluation.
+  // Failures here must not roll back the attempt — best-effort only.
+  if ((result as any).finishedAttempt) {
+    const a = (result as any).finishedAttempt as typeof quizAttemptsTable.$inferSelect;
+    Promise.resolve()
+      .then(async () => {
+        try {
+          await addPoints(a.userId, a.score);
+          const { state, bumped } = await bumpStreak(a.userId, 0);
+          if (bumped) await evaluateStreakBadges(a.userId, state.currentStreak);
+          await evaluateQuizBadges(a.userId, {
+            score: a.score,
+            totalPoints: a.totalPoints,
+            status: a.status,
+          });
+        } catch {
+          /* best-effort */
+        }
+      })
+      .catch(() => {});
+  }
   res.status(result.http).json(result.body);
 });
 
@@ -768,7 +791,7 @@ router.get("/qa/attempts/:id", requireAuth, async (req, res) => {
     attempt.status !== "in_progress" ||
     (!isOwnAttempt && hasRoleAtLeast(req.user, "admin"));
 
-  const safeAnswers = answers.map((a) =>
+  const safeAnswers = answers.map((a: typeof quizAnswersTable.$inferSelect) =>
     isReviewer
       ? serializeAnswer(a)
       : {
@@ -830,7 +853,7 @@ router.get("/qa/leaderboard", async (req, res) => {
 
   res.json({
     window,
-    entries: rows.map((r, i) => ({
+    entries: rows.map((r: any, i: number) => ({
       rank: i + 1,
       userId: r.userId,
       userName: r.userName,

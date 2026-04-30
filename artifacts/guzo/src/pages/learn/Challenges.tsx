@@ -46,7 +46,7 @@ export function Challenges() {
           </div>
         ) : (
           <div className="space-y-3">
-            {data.map((c) => {
+            {(Array.isArray(data) ? data : []).map((c) => {
               const endsIn = Math.max(
                 0,
                 Math.floor((new Date(c.endsAt).getTime() - Date.now()) / 1000),

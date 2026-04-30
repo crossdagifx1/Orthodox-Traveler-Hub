@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "comment": "Triggering fresh deployment to resolve Vercel redeploy error",
   "rewrites": [
     {
       "source": "/api/(.*)",

@@ -2,6 +2,7 @@ import "./i18n";
 import "./styles/design-tokens.css";
 
 import { AppRoutes } from "./AppRoutes";
+import { Analytics } from "@vercel/analytics/react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -71,6 +72,7 @@ function App() {
                       <PageLoader />
                       <GlobalLoginDialog />
                       <Toaster />
+                      <Analytics />
                       
                       {/* Service worker update notification */}
                       {updateAvailable && (

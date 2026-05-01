@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { FloatingControls } from "./FloatingControls";
+import { AdminToolbar } from "./AdminToolbar";
 import { MiniPlayer } from "../audio/MiniPlayer";
 import { useSettings } from "@/providers/SettingsProvider";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
         {isDesktop && <FloatingControls />}
         <MiniPlayer />
+        <AdminToolbar />
       </div>
     </div>
   );

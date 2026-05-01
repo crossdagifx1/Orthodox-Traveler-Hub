@@ -397,6 +397,11 @@
     "manageMarket": "ገበያን አስተዳድር",
     "manageMezmurs": "መዝሙራትን አስተዳድር",
     "manageNews": "ዜናዎችን አስተዳድር",
+    "destinations": { "title": "የቅዱሳት ቦታዎች አስተዳደር" },
+    "map": { "title": "የካርታ አስተዳደር" },
+    "market": { "title": "የገበያ አስተዳደር" },
+    "mezmurs": { "title": "የመዝሙራት አስተዳደር" },
+    "news": { "title": "የዜናዎች አስተዳደር" },
     "totalCount": "ጠቅላላ {{count}}",
     "addNew": "አዲስ ጨምር",
     "confirmDelete": "በትክክል ማጥፋት ይፈልጋሉ?",
@@ -411,7 +416,7 @@
       "empty": "ምንም ተጠቃሚ አልተገኘም"
     },
     "audit": {
-      "title": "የክንውን ምዝገባ",
+      "title": "የስርዓት ምዝግብ ማስታወሻዎች",
       "subtitle": "የእያንዳንዱ ልዩ ድርጊት ምዝገባ",
       "entries": "ምዝገባዎች",
       "empty": "ምንም ምዝገባ የለም"

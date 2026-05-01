@@ -397,6 +397,11 @@
     "manageMarket": "Manage marketplace",
     "manageMezmurs": "Manage mezmurs",
     "manageNews": "Manage news",
+    "destinations": { "title": "Destinations Admin" },
+    "map": { "title": "Map Admin" },
+    "market": { "title": "Marketplace Admin" },
+    "mezmurs": { "title": "Mezmurs Admin" },
+    "news": { "title": "News Admin" },
     "totalCount": "Total {{count}}",
     "addNew": "Add new",
     "confirmDelete": "Delete this item?",
@@ -411,7 +416,7 @@
       "empty": "No users match the filters."
     },
     "audit": {
-      "title": "Audit Log",
+      "title": "System Logs",
       "subtitle": "Append-only record of every privileged action.",
       "entries": "entries",
       "empty": "No audit entries yet."

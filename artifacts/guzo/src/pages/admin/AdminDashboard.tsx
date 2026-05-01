@@ -35,19 +35,19 @@ type Tile = {
 
 const TILES: Tile[] = [
   // Content management — admins
-  { titleKey: "nav.destinations", descKey: "admin.manageDestinations", icon: MapPin, path: "/admin/destinations", minRole: "admin" },
-  { titleKey: "nav.map", descKey: "admin.manageChurches", icon: Church, path: "/admin/churches", minRole: "admin" },
-  { titleKey: "nav.market", descKey: "admin.manageMarket", icon: ShoppingBag, path: "/admin/marketplace", minRole: "admin" },
-  { titleKey: "nav.mezmurs", descKey: "admin.manageMezmurs", icon: Music, path: "/admin/mezmurs", minRole: "admin" },
-  { titleKey: "nav.news", descKey: "admin.manageNews", icon: FileText, path: "/admin/news", minRole: "admin" },
+  { titleKey: "admin.destinations.title", descKey: "admin.manageDestinations", icon: MapPin, path: "/admin/destinations", minRole: "admin" },
+  { titleKey: "admin.map.title", descKey: "admin.manageChurches", icon: Church, path: "/admin/churches", minRole: "admin" },
+  { titleKey: "admin.market.title", descKey: "admin.manageMarket", icon: ShoppingBag, path: "/admin/marketplace", minRole: "admin" },
+  { titleKey: "admin.mezmurs.title", descKey: "admin.manageMezmurs", icon: Music, path: "/admin/mezmurs", minRole: "admin" },
+  { titleKey: "admin.news.title", descKey: "admin.manageNews", icon: FileText, path: "/admin/news", minRole: "admin" },
   // Q&A — open to teachers (moderator+)
   { titleKey: "admin.qa.title", descKey: "admin.qa.subtitle", icon: GraduationCap, path: "/admin/qa", minRole: "moderator", accentClass: "border-primary/40" },
   // Operations
   { titleKey: "admin.users.title", descKey: "admin.users.subtitle", icon: Users, path: "/admin/users", minRole: "admin" },
-  { titleKey: "admin.audit.title", descKey: "admin.audit.subtitle", icon: ScrollText, path: "/admin/audit", minRole: "admin" },
+  { titleKey: "admin.audit.title", descKey: "admin.audit.subtitle", icon: ScrollText, path: "/admin/audit", minRole: "admin", accentClass: "border-secondary/40 bg-secondary/5" },
   { titleKey: "admin.analytics.title", descKey: "admin.analytics.subtitle", icon: Activity, path: "/admin/analytics", minRole: "admin" },
   // Super-admin only
-  { titleKey: "admin.settings.title", descKey: "admin.settings.subtitle", icon: SettingsIcon, path: "/admin/settings", minRole: "superadmin", accentClass: "border-secondary/40" },
+  { titleKey: "admin.settings.title", descKey: "admin.settings.subtitle", icon: SettingsIcon, path: "/admin/settings", minRole: "superadmin" },
 ];
 
 export function AdminDashboard() {
@@ -162,6 +162,25 @@ export function AdminDashboard() {
             </Link>
           );
         })}
+      </div>
+
+      {/* Recent Activity Section */}
+      <div className="mt-8 mb-4 flex items-center justify-between px-2">
+        <h2 className="text-lg font-serif font-bold text-foreground flex items-center gap-2">
+          <ScrollText className="h-5 w-5 text-secondary" />
+          Recent Activity
+        </h2>
+        <Link href="/admin/audit">
+          <Button variant="ghost" size="sm" className="text-xs text-primary font-bold uppercase tracking-widest">
+            View All
+          </Button>
+        </Link>
+      </div>
+      
+      <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+        <div className="p-4 py-8 text-center text-muted-foreground text-xs italic">
+          Check the System Logs for a detailed audit trail of all administrative actions.
+        </div>
       </div>
     </div>
   );

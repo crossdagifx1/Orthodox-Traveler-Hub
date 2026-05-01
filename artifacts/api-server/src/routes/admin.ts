@@ -21,8 +21,33 @@ import { recordAudit } from "../lib/audit";
 
 const router: IRouter = Router();
 
-const ALLOWED_ROLES: AuthRole[] = ["user", "moderator", "admin", "superadmin"];
+const ALLOWED_ROLES: AuthRole[] = [
+  "user",
+  "moderator",
+  "destinations_admin",
+  "map_admin",
+  "marketplace_admin",
+  "mezmurs_admin",
+  "news_admin",
+  "admin",
+  "superadmin",
+];
 const ALLOWED_STATUSES = ["active", "suspended", "banned"] as const;
+
+/**
+ * Returns the count of users that have the super-admin role.
+ */
+async function countSuperadmins(excludeUserId?: number): Promise<number> {
+  const conds = [eq(usersTable.role, "superadmin")];
+  if (excludeUserId !== undefined) {
+    conds.push(sql`${usersTable.id} <> ${excludeUserId}`);
+  }
+  const [{ c }] = await db
+    .select({ c: sql<number>`count(*)::int` })
+    .from(usersTable)
+    .where(and(...conds));
+  return Number(c ?? 0);
+}
 
 /**
  * Returns the count of users that currently count as an *effective* super-admin —
@@ -141,6 +166,14 @@ router.patch("/admin/users/:id", requireAdmin, async (req, res) => {
       if (ROLE_RANK[newRole] > ROLE_RANK[actor.role]) {
         res.status(403).json({ error: "Cannot grant a role higher than your own" });
         return;
+      }
+      // Only ONE super-admin allowed.
+      if (newRole === "superadmin" && target.role !== "superadmin") {
+        const total = await countSuperadmins();
+        if (total >= 1) {
+          res.status(400).json({ error: "Only one super-admin is allowed in the system" });
+          return;
+        }
       }
       // Demoting any super-admin (self or other) requires at least one OTHER
       // active super-admin to remain. Status-aware: a banned/suspended super-admin

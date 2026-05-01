@@ -14,6 +14,11 @@ import {
   Trash2,
   Crown,
   User as UserIcon,
+  MapPin,
+  Church,
+  ShoppingBag,
+  Music,
+  FileText,
 } from "lucide-react";
 import {
   useAdminListUsers,
@@ -34,12 +39,27 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-const ROLES = ["user", "moderator", "admin", "superadmin"] as const;
+const ROLES = [
+  "user",
+  "moderator",
+  "destinations_admin",
+  "map_admin",
+  "marketplace_admin",
+  "mezmurs_admin",
+  "news_admin",
+  "admin",
+  "superadmin",
+] as const;
 const STATUSES = ["active", "suspended", "banned"] as const;
 
 const ROLE_STYLE: Record<string, string> = {
   user: "bg-muted text-muted-foreground",
   moderator: "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300",
+  destinations_admin: "bg-orange-100 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300",
+  map_admin: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
+  marketplace_admin: "bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300",
+  mezmurs_admin: "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300",
+  news_admin: "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300",
   admin: "bg-primary/15 text-primary",
   superadmin: "bg-secondary text-secondary-foreground",
 };
@@ -53,6 +73,11 @@ const STATUS_STYLE: Record<string, string> = {
 const ROLE_ICON: Record<string, typeof Shield> = {
   user: UserIcon,
   moderator: Shield,
+  destinations_admin: MapPin,
+  map_admin: Church,
+  marketplace_admin: ShoppingBag,
+  mezmurs_admin: Music,
+  news_admin: FileText,
   admin: ShieldCheck,
   superadmin: Crown,
 };
@@ -269,11 +294,21 @@ export function AdminUsers() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {ROLES.map((r) => (
-                          <SelectItem key={r} value={r} disabled={!isSuperAdmin && (r === "admin" || r === "superadmin")}>
-                            {r}
-                          </SelectItem>
-                        ))}
+                        {ROLES.map((r) => {
+                          const isSuperAdminRole = r === "superadmin";
+                          const otherSuperAdminExists = (users ?? []).some(other => other.role === "superadmin" && other.id !== u.id);
+                          const isRoleDisabled = !isSuperAdmin || (isSuperAdminRole && otherSuperAdminExists);
+                          
+                          return (
+                            <SelectItem 
+                              key={r} 
+                              value={r} 
+                              disabled={!isSuperAdmin && (r === "admin" || isSuperAdminRole) || (isSuperAdminRole && otherSuperAdminExists)}
+                            >
+                              {r}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                     <Select

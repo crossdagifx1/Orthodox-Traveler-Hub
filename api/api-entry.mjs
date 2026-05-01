@@ -58857,6 +58857,11 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 var ROLE_RANK = {
   user: 0,
   moderator: 10,
+  destinations_admin: 50,
+  map_admin: 50,
+  marketplace_admin: 50,
+  mezmurs_admin: 50,
+  news_admin: 50,
   admin: 100,
   superadmin: 1e3
 };
@@ -59729,8 +59734,26 @@ async function recordAudit(req, action, targetType, targetId, metadata2 = {}) {
 
 // artifacts/api-server/src/routes/admin.ts
 var router9 = (0, import_express9.Router)();
-var ALLOWED_ROLES = ["user", "moderator", "admin", "superadmin"];
+var ALLOWED_ROLES = [
+  "user",
+  "moderator",
+  "destinations_admin",
+  "map_admin",
+  "marketplace_admin",
+  "mezmurs_admin",
+  "news_admin",
+  "admin",
+  "superadmin"
+];
 var ALLOWED_STATUSES = ["active", "suspended", "banned"];
+async function countSuperadmins(excludeUserId) {
+  const conds = [eq(usersTable.role, "superadmin")];
+  if (excludeUserId !== void 0) {
+    conds.push(sql`${usersTable.id} <> ${excludeUserId}`);
+  }
+  const [{ c: c3 }] = await db.select({ c: sql`count(*)::int` }).from(usersTable).where(and(...conds));
+  return Number(c3 ?? 0);
+}
 async function countActiveSuperadmins(excludeUserId) {
   const conds = [eq(usersTable.role, "superadmin"), eq(usersTable.status, "active")];
   if (excludeUserId !== void 0) {
@@ -59818,6 +59841,13 @@ router9.patch("/admin/users/:id", requireAdmin, async (req, res) => {
       if (ROLE_RANK[newRole] > ROLE_RANK[actor.role]) {
         res.status(403).json({ error: "Cannot grant a role higher than your own" });
         return;
+      }
+      if (newRole === "superadmin" && target.role !== "superadmin") {
+        const total = await countSuperadmins();
+        if (total >= 1) {
+          res.status(400).json({ error: "Only one super-admin is allowed in the system" });
+          return;
+        }
       }
       if (target.role === "superadmin" && newRole !== "superadmin") {
         const remaining = await countActiveSuperadmins(target.id);

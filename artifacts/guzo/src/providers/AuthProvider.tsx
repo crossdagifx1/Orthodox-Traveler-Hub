@@ -1,11 +1,25 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { useGetCurrentUser, useLogout } from "@workspace/api-client-react";
 
-type Role = "user" | "moderator" | "admin" | "superadmin";
+type Role =
+  | "user"
+  | "moderator"
+  | "destinations_admin"
+  | "map_admin"
+  | "marketplace_admin"
+  | "mezmurs_admin"
+  | "news_admin"
+  | "admin"
+  | "superadmin";
 
 const RANK: Record<Role, number> = {
   user: 0,
   moderator: 10,
+  destinations_admin: 50,
+  map_admin: 50,
+  marketplace_admin: 50,
+  mezmurs_admin: 50,
+  news_admin: 50,
   admin: 100,
   superadmin: 1000,
 };

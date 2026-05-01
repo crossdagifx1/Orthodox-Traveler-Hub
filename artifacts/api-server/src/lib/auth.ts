@@ -3,7 +3,16 @@ import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-export type AuthRole = "user" | "moderator" | "admin" | "superadmin";
+export type AuthRole =
+  | "user"
+  | "moderator"
+  | "destinations_admin"
+  | "map_admin"
+  | "marketplace_admin"
+  | "mezmurs_admin"
+  | "news_admin"
+  | "admin"
+  | "superadmin";
 
 export type AuthUser = {
   id: number;
@@ -17,6 +26,11 @@ export type AuthUser = {
 export const ROLE_RANK: Record<AuthRole, number> = {
   user: 0,
   moderator: 10,
+  destinations_admin: 50,
+  map_admin: 50,
+  marketplace_admin: 50,
+  mezmurs_admin: 50,
+  news_admin: 50,
   admin: 100,
   superadmin: 1000,
 };

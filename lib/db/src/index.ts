@@ -22,6 +22,7 @@ let _pglite: PGlite | null = null;
 let _bootstrapped = false;
 
 if (process.env.DATABASE_URL) {
+  console.log("[db] Initializing with DATABASE_URL...");
   pool = new Pool({ connectionString: process.env.DATABASE_URL });
   db = drizzle(pool, { schema });
 } else {

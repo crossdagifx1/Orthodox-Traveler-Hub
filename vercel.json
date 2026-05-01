@@ -1,16 +1,13 @@
 {
   "version": 2,
-  "comment": "Triggering fresh deployment to resolve Vercel redeploy error",
+  "comment": "Fixed vercel.json schema and ensured calendar API routing",
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api/api-entry.mjs"
     },
     {
-      "handle": "filesystem"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]

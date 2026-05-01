@@ -53221,6 +53221,7 @@ var pool;
 var _pglite = null;
 var _bootstrapped = false;
 if (process.env.DATABASE_URL) {
+  console.log("[db] Initializing with DATABASE_URL...");
   pool = new Pool3({ connectionString: process.env.DATABASE_URL });
   db = drizzle(pool, { schema: schema_exports });
 } else {

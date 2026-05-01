@@ -30,6 +30,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { EngagementSection } from "@/components/engagement/EngagementSection";
+import { ContributionSection } from "@/components/engagement/ContributionSection";
 import { SeoHead } from "@/components/seo/SeoHead";
 
 export function DestinationDetail() {
@@ -369,6 +370,7 @@ export function DestinationDetail() {
         </button>
       )}
 
+      <ContributionSection targetType="destination" targetId={id} />
       <EngagementSection targetType="destination" targetId={id} />
     </div>
   );

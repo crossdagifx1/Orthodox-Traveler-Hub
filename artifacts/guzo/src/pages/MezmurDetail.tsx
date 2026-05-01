@@ -20,13 +20,17 @@ import {
   Calendar,
   Languages,
   ListMusic,
+  Download,
+  Check,
+  CloudOff,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { usePlayer } from "@/components/audio/PlayerContext";
 import { EngagementSection } from "@/components/engagement/EngagementSection";
 import { SeoHead } from "@/components/seo/SeoHead";
+import { cn } from "@/lib/utils";
 
 export function MezmurDetail() {
   const { t } = useTranslation();
@@ -54,11 +58,53 @@ export function MezmurDetail() {
     return (Array.isArray(trending) ? trending : []).filter((m) => m.id !== mezmur?.id).slice(0, 5);
   }, [trending, mezmur]);
 
-  const { playTrack, pauseTrack, resumeTrack, currentTrack, isPlaying } = usePlayer();
+  const { 
+    playTrack, 
+    pauseTrack, 
+    resumeTrack, 
+    currentTrack, 
+    isPlaying, 
+    progress, 
+    duration, 
+    seek 
+  } = usePlayer();
   const incrementPlays = useIncrementMezmurPlays();
 
-  const isCurrent = currentTrack?.id === id;
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloaded, setIsDownloaded] = useState(false);
 
+  useEffect(() => {
+    if (mezmur) {
+      checkDownloadStatus();
+    }
+  }, [mezmur]);
+
+  const checkDownloadStatus = async () => {
+    if (!mezmur) return;
+    try {
+      const cache = await caches.open("mezmur-audio");
+      const match = await cache.match(mezmur.audioUrl);
+      setIsDownloaded(!!match);
+    } catch (e) {
+      console.error("Cache check failed", e);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!mezmur) return;
+    setIsDownloading(true);
+    try {
+      const cache = await caches.open("mezmur-audio");
+      await cache.add(mezmur.audioUrl);
+      setIsDownloaded(true);
+    } catch (e) {
+      console.error("Download failed", e);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const isCurrent = currentTrack?.id === id;
   const handlePlayToggle = () => {
     if (!mezmur) return;
     if (isCurrent && isPlaying) {
@@ -110,18 +156,43 @@ export function MezmurDetail() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
-          {t("mezmurs.playing")}
-        </span>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full"
-          onClick={onShare}
-          data-testid="button-share"
-        >
-          <Share2 className="h-5 w-5" />
-        </Button>
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
+            {t("mezmurs.playing")}
+          </span>
+          {isDownloaded && (
+            <span className="text-[8px] uppercase tracking-widest text-muted-foreground flex items-center gap-1 mt-0.5">
+              <Check className="h-2 w-2" /> Offline
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn("rounded-full", isDownloaded && "text-primary")}
+            onClick={handleDownload}
+            disabled={isDownloading || isDownloaded}
+            data-testid="button-download"
+          >
+            {isDownloading ? (
+              <div className="h-4 w-4 border-2 border-primary border-t-transparent animate-spin rounded-full" />
+            ) : isDownloaded ? (
+              <Check className="h-5 w-5" />
+            ) : (
+              <Download className="h-5 w-5" />
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+            onClick={onShare}
+            data-testid="button-share"
+          >
+            <Share2 className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Cover */}
@@ -161,19 +232,29 @@ export function MezmurDetail() {
           </div>
         </div>
 
-        {/* Progress (cosmetic) */}
+        {/* Progress */}
         <div className="w-full mb-6 px-2">
-          <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+          <div 
+            className="h-1.5 w-full bg-muted rounded-full overflow-hidden cursor-pointer relative group"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const pct = x / rect.width;
+              seek(pct * duration);
+            }}
+          >
             <div
-              className="h-full bg-primary rounded-full"
-              style={{ width: isCurrent && isPlaying ? "60%" : "0%", transition: "width 1s linear" }}
+              className="h-full bg-primary rounded-full transition-all duration-300 ease-linear"
+              style={{ width: `${(progress / (duration || 1)) * 100}%` }}
+            />
+            <div 
+              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-primary border-2 border-background rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ left: `${(progress / (duration || 1)) * 100}%` }}
             />
           </div>
           <div className="flex justify-between text-[10px] text-muted-foreground mt-2 font-medium tabular-nums">
-            <span>{isCurrent && isPlaying ? "1:14" : "0:00"}</span>
-            <span>
-              {mins}:{secs}
-            </span>
+            <span>{formatTime(progress)}</span>
+            <span>{formatTime(duration)}</span>
           </div>
         </div>
 
@@ -394,4 +475,11 @@ function categoryBlurb(category: string): string {
     default:
       return "Part of the rich tradition of sacred song that has shaped Ethiopian Orthodox worship for over fifteen centuries.";
   }
+}
+
+function formatTime(seconds: number): string {
+  if (isNaN(seconds)) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+  return `${mins}:${secs}`;
 }

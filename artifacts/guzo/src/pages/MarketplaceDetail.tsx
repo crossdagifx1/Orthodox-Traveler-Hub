@@ -27,7 +27,9 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useWishlist } from "@/providers/WishlistProvider";
 import { cn } from "@/lib/utils";
 import { EngagementSection } from "@/components/engagement/EngagementSection";
+import { ChatOverlay } from "@/components/market/ChatOverlay";
 import { SeoHead } from "@/components/seo/SeoHead";
+import { useState } from "react";
 
 export function MarketplaceDetail() {
   const { t } = useTranslation();
@@ -35,6 +37,7 @@ export function MarketplaceDetail() {
   const id = params?.id || "";
   const { isAuthed, openLogin } = useAuth();
   const wishlist = useWishlist();
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const { data: item, isLoading } = useGetMarketplaceItem(id, {
     query: { enabled: !!id, queryKey: getGetMarketplaceItemQueryKey(id) },
@@ -70,7 +73,7 @@ export function MarketplaceDetail() {
       openLogin(t("auth.loginRequired"));
       return;
     }
-    window.open(`mailto:seller@example.com?subject=Guzo: ${item.title}`);
+    setIsChatOpen(true);
   };
 
   const onShare = async () => {
@@ -202,29 +205,35 @@ export function MarketplaceDetail() {
 
         {/* Seller card */}
         <Section title={t("market.seller")}>
-          <div className="bg-card border border-border/60 rounded-2xl p-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                <Seller className="h-6 w-6" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-bold text-foreground truncate">{item.sellerName}</div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
-                  <MapPin className="h-3 w-3" /> {item.sellerLocation || "—"}
+          <Link href={`/market/seller/1`}>
+            <div className="bg-card border border-border/60 rounded-2xl p-4 shadow-sm hover:border-primary/40 transition-colors cursor-pointer group">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Seller className="h-6 w-6" />
                 </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-foreground truncate group-hover:text-primary transition-colors">{item.sellerName}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
+                    <MapPin className="h-3 w-3" /> {item.sellerLocation || "—"}
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full text-xs"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onContact();
+                  }}
+                  data-testid="button-message-seller"
+                >
+                  <MessageCircle className="h-3.5 w-3.5 mr-1" />
+                  {t("market.message", { defaultValue: "Message" })}
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full text-xs"
-                onClick={onContact}
-                data-testid="button-message-seller"
-              >
-                <MessageCircle className="h-3.5 w-3.5 mr-1" />
-                {t("market.message", { defaultValue: "Message" })}
-              </Button>
             </div>
-          </div>
+          </Link>
         </Section>
 
         {/* Shipping & care */}
@@ -304,6 +313,21 @@ export function MarketplaceDetail() {
       </div>
 
       <EngagementSection targetType="marketplace" targetId={id} />
+      
+      {item && (
+        <ChatOverlay 
+          isOpen={isChatOpen} 
+          onClose={() => setIsChatOpen(false)} 
+          item={{
+            id: item.id.toString(),
+            title: item.title,
+            price: item.price,
+            currency: item.currency,
+            sellerName: item.sellerName,
+            imageUrl: item.imageUrl
+          }}
+        />
+      )}
     </div>
   );
 }

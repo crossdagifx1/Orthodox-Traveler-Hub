@@ -30,6 +30,8 @@ export const usersTable = pgTable("users", {
   bio: text("bio").notNull().default(""),
   /** When false, /u/:id returns 404; the user only appears in private contexts. */
   isPublic: boolean("is_public").notNull().default(true),
+  /** Whether the user (e.g. seller) is verified by admins. */
+  isVerified: boolean("is_verified").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 export type User = typeof usersTable.$inferSelect;
@@ -81,12 +83,39 @@ export const marketplaceItemsTable = pgTable("marketplace_items", {
   imageUrl: text("image_url").notNull(),
   sellerName: text("seller_name").notNull(),
   sellerLocation: text("seller_location").notNull().default(""),
+  locationCity: text("location_city").notNull().default(""),
+  userId: integer("user_id"),
   condition: text("condition").notNull().default("New"),
+  status: text("status").notNull().default("active"),
+  isBoosted: boolean("is_boosted").notNull().default(false),
   inStock: boolean("in_stock").notNull().default(true),
   isFeatured: boolean("is_featured").notNull().default(false),
+  views: integer("views").notNull().default(0),
+  phone: text("phone"),
+  attributes: jsonb("attributes").$type<Record<string, any>>().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 export type MarketplaceItem = typeof marketplaceItemsTable.$inferSelect;
+
+export const conversationsTable = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  buyerId: integer("buyer_id").notNull(),
+  sellerId: integer("seller_id").notNull(),
+  itemId: integer("item_id").notNull(),
+  lastMessage: text("last_message"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export type Conversation = typeof conversationsTable.$inferSelect;
+
+export const messagesTable = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull(),
+  senderId: integer("sender_id").notNull(),
+  content: text("content").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export type Message = typeof messagesTable.$inferSelect;
 
 export const mezmursTable = pgTable("mezmurs", {
   id: serial("id").primaryKey(),
@@ -485,3 +514,15 @@ export const notificationsTable = pgTable(
   }),
 );
 export type Notification = typeof notificationsTable.$inferSelect;
+
+export const itinerariesTable = pgTable("itineraries", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  isPublic: boolean("is_public").notNull().default(true),
+  /** Array of { destinationId: number, day: number, note: string } */
+  items: jsonb("items").notNull().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export type Itinerary = typeof itinerariesTable.$inferSelect;

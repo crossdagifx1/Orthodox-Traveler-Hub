@@ -119,6 +119,8 @@
     "featured": "ተመራጭ",
     "trending": "ተወዳጅ",
     "new": "አዲስ",
+    "follow": "ተከተል",
+    "following": "ተከትለሃል",
     "tryAgain": "እንደገና ይሞክሩ",
     "comingSoon": "በቅርቡ ይመጣል",
     "errorOccurred": "ስህተት ተከስቷል"
@@ -158,6 +160,7 @@
     "avatarUrl": "የምስል አድራሻ",
     "bio": "ስለ እኔ",
     "isPublic": "መገለጫዬን በይፋ አሳይ",
+    "isVerified": "የተረጋገጠ",
     "streak": "ቀናት ተከታታይ",
     "points": "ነጥቦች",
     "badges": "ባጆች",
@@ -165,6 +168,13 @@
     "noBookmarks": "ገና ምንም አልተቀመጠም። የወደዱትን በልብ ምልክት ያድርጉ።",
     "noBadges": "ጥያቄዎችን በማጠናቀቅ እና ተከታታይ በመጠበቅ ባጆች ያግኙ።",
     "notFoundOrPrivate": "ይህ መገለጫ የግል ነው ወይም የለም።"
+  },
+  "itineraries": {
+    "title": "የእኔ ጉዞዎች",
+    "subtitle": "መንፈሳዊ ጉዞዎችዎን ያቅዱ እና ያደራጁ።",
+    "createNew": "አዲስ የጉዞ ዕቅድ ፍጠር",
+    "loginPrompt": "የመንፈሳዊ ጉዞዎችዎን ለማቀድ እና ቅዱሳት ቦታዎችን ለማስቀመጥ ይግቡ።",
+    "stops": "{{count}} ማቆሚያዎች"
   },
   "home": {
     "startJourney": "ጉዞ ይጀምሩ",

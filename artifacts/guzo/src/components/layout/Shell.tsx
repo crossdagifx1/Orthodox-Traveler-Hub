@@ -3,7 +3,11 @@ import { FloatingControls } from "./FloatingControls";
 import { AdminToolbar } from "./AdminToolbar";
 import { MiniPlayer } from "../audio/MiniPlayer";
 import { useSettings } from "@/providers/SettingsProvider";
+import { useOffline } from "@/hooks/useOffline";
 import { cn } from "@/lib/utils";
+import { WifiOff } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 /**
  * Chrome-less shell so the app is embeddable on web / mobile / inside an iframe.
@@ -18,6 +22,8 @@ import { cn } from "@/lib/utils";
  */
 export function Shell({ children }: { children: ReactNode }) {
   const { effectiveView } = useSettings();
+  const isOffline = useOffline();
+  const { t } = useTranslation();
   const isDesktop = effectiveView === "desktop";
 
   return (
@@ -45,6 +51,22 @@ export function Shell({ children }: { children: ReactNode }) {
             : "w-full h-[100dvh] md:h-[90vh] md:max-h-[900px] md:w-[430px] md:min-w-[400px] md:mt-[5vh] md:rounded-[36px] md:border-[8px] md:border-[#2a1f10] md:shadow-2xl ring-0 md:ring-1 md:ring-primary/20",
         )}
       >
+        <AnimatePresence>
+          {isOffline && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="bg-secondary/10 border-b border-secondary/20 overflow-hidden"
+            >
+              <div className="px-4 py-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-secondary">
+                <WifiOff className="h-3 w-3" />
+                <span>{t("common.offlineMode", { defaultValue: "Offline Mode — Limited Functionality" })}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <main
           className={cn(
             "flex-1 overflow-y-auto overflow-x-hidden relative",

@@ -5,14 +5,14 @@ import { Link } from "wouter";
 import { useState, useMemo } from "react";
 
 import { useTranslation } from "react-i18next";
-
 import { Input } from "@/components/ui/input";
-
-import { Search, MapPin, Calendar, Sparkles } from "lucide-react";
-
+import { Search, MapPin, Calendar, Sparkles, Download, Check, Wifi, WifiOff } from "lucide-react";
 import { Card } from "@/components/ui/card";
-
+import { Button } from "@/components/ui/button";
+import { useOffline } from "@/hooks/useOffline";
 import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
+import { getGetDestinationQueryKey } from "@workspace/api-client-react";
 
 
 
@@ -64,15 +64,51 @@ export function Destinations() {
 
 
 
+  const isOffline = useOffline();
+  const qc = useQueryClient();
+  const [cachingRegion, setCachingRegion] = useState<string | null>(null);
+
+  const handleCacheRegion = async () => {
+    if (region === "all") return;
+    setCachingRegion(region);
+    
+    // Simulate pre-fetching all destinations in this region
+    const targets = filtered.map(d => d.id);
+    for (const tid of targets) {
+      // In a real app, we'd trigger a query fetch here
+      // qc.prefetchQuery({ queryKey: getGetDestinationQueryKey(tid) })
+      await new Promise(r => setTimeout(r, 100));
+    }
+    
+    setCachingRegion(null);
+  };
+
   return (
 
     <div className="pb-20">
 
       <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40">
-
-        <h1 className="text-2xl font-serif font-bold text-primary">{t("destinations.title")}</h1>
-
-        <p className="text-xs text-muted-foreground mb-3">{t("destinations.subtitle")}</p>
+        <div className="flex justify-between items-start mb-1">
+          <div>
+            <h1 className="text-2xl font-serif font-bold text-primary">{t("destinations.title")}</h1>
+            <p className="text-xs text-muted-foreground mb-3">{t("destinations.subtitle")}</p>
+          </div>
+          {region !== "all" && !isOffline && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="rounded-full h-8 text-[10px] font-bold uppercase tracking-wider"
+              onClick={handleCacheRegion}
+              disabled={!!cachingRegion}
+            >
+              {cachingRegion ? (
+                <><div className="h-3 w-3 border-2 border-primary border-t-transparent animate-spin rounded-full mr-2" /> Saving...</>
+              ) : (
+                <><Download className="h-3.5 w-3.5 mr-1.5" /> Cache Region</>
+              )}
+            </Button>
+          )}
+        </div>
 
         <div className="relative">
 

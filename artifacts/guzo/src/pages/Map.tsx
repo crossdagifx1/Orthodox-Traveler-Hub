@@ -14,8 +14,14 @@ import {
   ChevronRight,
   CloudDownload,
   Loader2,
+  Layers,
+  Zap,
+  Camera,
+  Sparkles,
+  Navigation2
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -24,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 import { AdvancedMap, type AdvancedMapMarker } from "@/components/map/AdvancedMap";
 import { GoogleMapView } from "@/components/map/GoogleMapView";
 import { useAuth } from "@/providers/AuthProvider";
@@ -38,6 +45,12 @@ export function Map() {
   const [country, setCountry] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [syncing, setSyncing] = useState(false);
+  const [is3D, setIs3D] = useState(false);
+  const [showSocial, setShowSocial] = useState(true);
+  const [isCompassOpen, setIsCompassOpen] = useState(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [downloadingRegion, setDownloadingRegion] = useState<string | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   const { data: churches } = useListChurches(
     {},
@@ -201,12 +214,126 @@ export function Map() {
       </div>
 
       {view === "map" ? (
-        <div className="flex-1 relative">
+        <div className="flex-1 relative overflow-hidden">
+          {/* Immersive Floating Controls */}
+          <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+            <button
+              onClick={() => setIs3D(!is3D)}
+              className={cn(
+                "w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-md transition-all border",
+                is3D ? "bg-primary text-primary-foreground border-primary" : "bg-background/80 text-foreground border-border/60"
+              )}
+            >
+              <Layers className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setShowSocial(!showSocial)}
+              className={cn(
+                "w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-md transition-all border",
+                showSocial ? "bg-secondary text-secondary-foreground border-secondary" : "bg-background/80 text-foreground border-border/60"
+              )}
+            >
+              <Sparkles className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setIsCompassOpen(!isCompassOpen)}
+              className="w-10 h-10 rounded-2xl bg-background/80 text-foreground flex items-center justify-center shadow-lg backdrop-blur-md border border-border/60"
+            >
+              <Navigation2 className={cn("h-5 w-5 transition-transform", isCompassOpen && "rotate-45")} />
+            </button>
+            <button
+              onClick={() => setIsDownloadModalOpen(true)}
+              className="w-10 h-10 rounded-2xl bg-background/80 text-foreground flex items-center justify-center shadow-lg backdrop-blur-md border border-border/60"
+            >
+              <CloudDownload className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Offline Region Modal */}
+          <AnimatePresence>
+            {isDownloadModalOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="absolute inset-0 z-[60] flex items-center justify-center p-6 bg-background/20 backdrop-blur-sm"
+              >
+                <div className="bg-card w-full max-w-sm rounded-3xl shadow-2xl border border-border/60 overflow-hidden">
+                  <div className="p-6 border-b border-border/40 flex justify-between items-center">
+                    <div>
+                      <h3 className="font-bold text-lg">Offline Regions</h3>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Download maps for remote areas</p>
+                    </div>
+                    <button onClick={() => setIsDownloadModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+                       <Loader2 className={cn("h-5 w-5", downloadingRegion && "animate-spin")} />
+                    </button>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {[
+                      { id: "tigray", name: "Tigray (Gheralta)", size: "45 MB" },
+                      { id: "lalibela", name: "Lalibela & Surroundings", size: "32 MB" },
+                      { id: "axum", name: "Axum Holy District", size: "18 MB" }
+                    ].map(region => (
+                      <div key={region.id} className="flex items-center justify-between p-3 rounded-2xl bg-secondary/5 border border-secondary/10">
+                        <div>
+                          <div className="text-sm font-bold">{region.name}</div>
+                          <div className="text-[10px] text-muted-foreground">{region.size}</div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant={downloadingRegion === region.id ? "ghost" : "outline"}
+                          className="rounded-full h-8 px-4 text-xs"
+                          onClick={() => {
+                            setDownloadingRegion(region.id);
+                            let p = 0;
+                            const int = setInterval(() => {
+                              p += 10;
+                              setDownloadProgress(p);
+                              if(p >= 100) {
+                                clearInterval(int);
+                                setDownloadingRegion(null);
+                                setDownloadProgress(0);
+                                toast({ title: "Map Downloaded", description: `${region.name} is now available offline.` });
+                              }
+                            }, 300);
+                          }}
+                        >
+                          {downloadingRegion === region.id ? `${downloadProgress}%` : "Download"}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-4 bg-muted/30 text-center">
+                    <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-widest leading-relaxed">
+                      Maps include high-detail topography, monastery POIs, and hiking trails.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Social Proximity Alert (Mock) */}
+          {showSocial && (
+            <div className="absolute bottom-4 left-4 right-4 z-20 pointer-events-none">
+              <div className="bg-background/90 backdrop-blur-md p-3 rounded-2xl border border-primary/20 shadow-xl flex items-center gap-3 pointer-events-auto max-w-sm mx-auto animate-in slide-in-from-bottom-4">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <Camera className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-bold text-primary uppercase tracking-widest">Nearby Insight</div>
+                  <div className="text-xs text-foreground font-medium truncate">A pilgrim just shared a reflection in Axum</div>
+                </div>
+                <Zap className="h-4 w-4 text-amber-500 animate-pulse" />
+              </div>
+            </div>
+          )}
+
           <GoogleMapView
             markers={markers}
             center={{ lat: 9.145, lng: 40.489673 }}
             zoom={6}
-            className="h-full"
+            className={cn("h-full transition-transform duration-1000", is3D && "perspective-1000 rotate-x-12")}
             fallback={
               <AdvancedMap
                 markers={markers}

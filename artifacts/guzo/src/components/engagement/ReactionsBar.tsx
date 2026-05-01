@@ -7,6 +7,8 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/providers/AuthProvider";
+import { useOffline } from "@/hooks/useOffline";
+import { useOfflineQueue } from "@/hooks/useServiceWorker";
 import { cn } from "@/lib/utils";
 
 const KINDS = [
@@ -52,6 +54,9 @@ export function ReactionsBar({ targetType, targetId, className }: Props) {
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: getListReactionsQueryKey(params) });
 
+  const isOffline = useOffline();
+  const { addToQueue } = useOfflineQueue();
+
   const toggle = (kind: Kind) => {
     if (!isAuthed) {
       openLogin(
@@ -61,6 +66,23 @@ export function ReactionsBar({ targetType, targetId, className }: Props) {
       );
       return;
     }
+
+    if (isOffline) {
+      const method = mine.has(kind) ? "DELETE" : "POST";
+      const url = "/api/reactions"; // Simplified for demonstration
+      
+      addToQueue({
+        url,
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetType, targetId, kind }),
+      });
+      
+      // Optimistically update the UI by invalidating or manually updating cache
+      invalidate();
+      return;
+    }
+
     if (mine.has(kind)) {
       deleteMutation.mutate(
         { params: { targetType, targetId, kind } },

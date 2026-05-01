@@ -269,29 +269,34 @@ export function NewsDetail() {
         >
 
           {post.content.split("\n\n").map((paragraph, i) => {
+            const trimmed = paragraph.trim();
+            const youtubeId = getYoutubeId(trimmed);
 
-            // Convert lines starting with `- ` into list items
-
-            if (paragraph.split("\n").every((line) => line.trim().startsWith("- "))) {
-
+            if (youtubeId) {
               return (
-
-                <ul key={i}>
-
-                  {paragraph.split("\n").map((line, j) => (
-
-                    <li key={j}>{line.replace(/^- /, "")}</li>
-
-                  ))}
-
-                </ul>
-
+                <div key={i} className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg my-6">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${youtubeId}`}
+                    title="YouTube video player"
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
               );
-
             }
 
+            // Convert lines starting with `- ` into list items
+            if (paragraph.split("\n").every((line) => line.trim().startsWith("- "))) {
+              return (
+                <ul key={i}>
+                  {paragraph.split("\n").map((line, j) => (
+                    <li key={j}>{line.replace(/^- /, "")}</li>
+                  ))}
+                </ul>
+              );
+            }
             return <p key={i}>{paragraph}</p>;
-
           })}
 
         </article>
@@ -435,8 +440,12 @@ export function NewsDetail() {
 
 
 function Dot() {
-
   return <span className="text-muted-foreground/40">•</span>;
+}
 
+function getYoutubeId(url: string) {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
 }
 

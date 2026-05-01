@@ -17,9 +17,15 @@ const MezmurDetail = lazy(() => import("./pages/MezmurDetail").then(m => ({ defa
 const News = lazy(() => import("./pages/News").then(m => ({ default: m.News })));
 const NewsDetail = lazy(() => import("./pages/NewsDetail").then(m => ({ default: m.NewsDetail })));
 const ChurchDetail = lazy(() => import("./pages/ChurchDetail").then(m => ({ default: m.ChurchDetail })));
+const Prayers = lazy(() => import("./pages/Prayers").then(m => ({ default: m.Prayers })));
+const PrayerDetail = lazy(() => import("./pages/PrayerDetail").then(m => ({ default: m.PrayerDetail })));
+const Itineraries = lazy(() => import("./pages/Itineraries").then(m => ({ default: m.Itineraries })));
+const ItineraryDetail = lazy(() => import("./pages/ItineraryDetail").then(m => ({ default: m.ItineraryDetail })));
 
 const MeProfile = lazy(() => import("./pages/profile/Me").then(m => ({ default: m.MeProfile })));
 const PublicProfile = lazy(() => import("./pages/profile/PublicProfile").then(m => ({ default: m.PublicProfile })));
+const SellerStore = lazy(() => import("./pages/market/SellerStore").then(m => ({ default: m.SellerStore })));
+const SellerDashboard = lazy(() => import("./pages/market/SellerDashboard").then(m => ({ default: m.SellerDashboard })));
 
 const Learn = lazy(() => import("./pages/learn/Learn").then(m => ({ default: m.Learn })));
 const QuizDetail = lazy(() => import("./pages/learn/QuizDetail").then(m => ({ default: m.QuizDetail })));
@@ -62,12 +68,20 @@ export function AppRoutes() {
         <Route path="/marketplace/new">{() => <LazyRoute component={MarketplaceNew} />}</Route>
         <Route path="/marketplace/:id">{() => <LazyRoute component={MarketplaceDetail} />}</Route>
         <Route path="/marketplace">{() => <LazyRoute component={Marketplace} />}</Route>
+        <Route path="/market/seller/:id">{() => <LazyRoute component={SellerStore} />}</Route>
+        <Route path="/market/dashboard">{() => <LazyRoute component={SellerDashboard} />}</Route>
 
         <Route path="/mezmurs/:id">{() => <LazyRoute component={MezmurDetail} />}</Route>
         <Route path="/mezmurs">{() => <LazyRoute component={Mezmurs} />}</Route>
 
         <Route path="/news/:id">{() => <LazyRoute component={NewsDetail} />}</Route>
         <Route path="/news">{() => <LazyRoute component={News} />}</Route>
+
+        <Route path="/prayers/:id">{() => <LazyRoute component={PrayerDetail} />}</Route>
+        <Route path="/prayers">{() => <LazyRoute component={Prayers} />}</Route>
+
+        <Route path="/itineraries/:id">{() => <LazyRoute component={ItineraryDetail} />}</Route>
+        <Route path="/itineraries">{() => <LazyRoute component={Itineraries} />}</Route>
 
         {/* Profiles */}
         <Route path="/me">{() => <LazyRoute component={MeProfile} />}</Route>

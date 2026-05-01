@@ -11,6 +11,7 @@ import {
   Save,
   Star,
   X,
+  CheckCircle,
 } from "lucide-react";
 import {
   getGetMyProfileQueryKey,
@@ -237,7 +238,12 @@ export function MeProfile() {
 
         {!editing ? (
           <>
-            <h1 className="text-xl font-bold">{me.displayName || me.name}</h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-xl font-bold">{me.displayName || me.name}</h1>
+              {(me as any).isVerified && (
+                <CheckCircle className="h-4 w-4 text-primary fill-primary/10" />
+              )}
+            </div>
             <p className="text-xs text-muted-foreground mt-0.5">{me.email}</p>
             {me.bio && (
               <p className="text-sm text-foreground/80 mt-3 max-w-md">{me.bio}</p>

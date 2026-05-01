@@ -11,6 +11,7 @@ import adminRouter from "./admin";
 import qaRouter from "./qa";
 import socialRouter from "./social";
 import calendarRouter from "./calendar";
+import itinerariesRouter from "./itineraries";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(adminRouter);
 router.use(qaRouter);
 router.use(socialRouter);
 router.use(calendarRouter);
+router.use(itinerariesRouter);
 
 export default router;

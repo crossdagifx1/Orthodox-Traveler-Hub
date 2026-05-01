@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, marketplaceItemsTable } from "@workspace/db";
+import { db, marketplaceItemsTable, usersTable } from "@workspace/db";
 import { and, desc, eq, ilike, or } from "drizzle-orm";
 import {
   CreateMarketplaceItemBody,
@@ -10,21 +10,24 @@ import { requireAuth, requireAdmin } from "../lib/auth";
 
 const router: IRouter = Router();
 
-function serialize(m: typeof marketplaceItemsTable.$inferSelect) {
+function serialize(m: any) {
+  const item = m.marketplace_items || m;
+  const user = m.users;
   return {
-    id: String(m.id),
-    title: m.title,
-    category: m.category,
-    price: Number(m.price),
-    currency: m.currency,
-    description: m.description,
-    imageUrl: m.imageUrl,
-    sellerName: m.sellerName,
-    sellerLocation: m.sellerLocation ?? "",
-    condition: m.condition,
-    inStock: m.inStock,
-    isFeatured: m.isFeatured,
-    createdAt: m.createdAt.toISOString(),
+    id: String(item.id),
+    title: item.title,
+    category: item.category,
+    price: Number(item.price),
+    currency: item.currency,
+    description: item.description,
+    imageUrl: item.imageUrl,
+    sellerName: item.sellerName,
+    sellerLocation: item.sellerLocation ?? "",
+    sellerIsVerified: !!user?.isVerified,
+    condition: item.condition,
+    inStock: item.inStock,
+    isFeatured: item.isFeatured,
+    createdAt: item.createdAt.toISOString(),
   };
 }
 
@@ -44,6 +47,7 @@ router.get("/marketplace/items", async (req, res) => {
   const rows = await db
     .select()
     .from(marketplaceItemsTable)
+    .leftJoin(usersTable, eq(marketplaceItemsTable.userId, usersTable.id))
     .where(conditions.length ? and(...conditions) : undefined)
     .orderBy(desc(marketplaceItemsTable.isFeatured), desc(marketplaceItemsTable.createdAt));
   res.json(rows.map(serialize));
@@ -53,6 +57,7 @@ router.get("/marketplace/items/featured", async (_req, res) => {
   const rows = await db
     .select()
     .from(marketplaceItemsTable)
+    .leftJoin(usersTable, eq(marketplaceItemsTable.userId, usersTable.id))
     .where(eq(marketplaceItemsTable.isFeatured, true))
     .orderBy(desc(marketplaceItemsTable.createdAt));
   res.json(rows.map(serialize));
@@ -63,6 +68,7 @@ router.get("/marketplace/items/:id", async (req, res) => {
   const [row] = await db
     .select()
     .from(marketplaceItemsTable)
+    .leftJoin(usersTable, eq(marketplaceItemsTable.userId, usersTable.id))
     .where(eq(marketplaceItemsTable.id, id))
     .limit(1);
   if (!row) {

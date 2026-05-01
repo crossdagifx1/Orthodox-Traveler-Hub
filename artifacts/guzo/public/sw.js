@@ -42,14 +42,32 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Skip API requests (they should go to network)
-  if (url.pathname.startsWith('/api')) return;
+  // Handle API requests with Stale-While-Revalidate
+  if (url.pathname.startsWith('/api')) {
+    event.respondWith(handleApiRequest(request));
+    return;
+  }
 
   // Skip external resources
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(handleRequest(request));
 });
+
+async function handleApiRequest(request) {
+  const cacheKey = 'api-cache';
+  const cache = await caches.open(cacheKey);
+  const cachedResponse = await cache.match(request);
+
+  const fetchPromise = fetch(request).then(async (networkResponse) => {
+    if (networkResponse.ok) {
+      await cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  });
+
+  return cachedResponse || fetchPromise;
+}
 
 async function handleRequest(request) {
   const url = new URL(request.url);
@@ -91,9 +109,10 @@ self.addEventListener('sync', (event) => {
   }
 });
 
+const DB_NAME = 'guzo-offline';
+const STORE_NAME = 'mutations';
+
 async function syncMutations() {
-  // Implement sync logic for offline mutations
-  // This would read from IndexedDB and replay mutations
   const mutations = await getPendingMutations();
   
   for (const mutation of mutations) {
@@ -110,13 +129,34 @@ async function syncMutations() {
   }
 }
 
+async function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+  });
+}
+
 async function getPendingMutations() {
-  // Get mutations from IndexedDB
-  return [];
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
 }
 
 async function removeMutation(id) {
-  // Remove mutation from IndexedDB
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
 }
 
 // Push notifications

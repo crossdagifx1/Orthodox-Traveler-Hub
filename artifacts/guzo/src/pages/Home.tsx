@@ -8,7 +8,7 @@ import {
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
-import { MapPin, ArrowRight, Sparkles, Music, Newspaper, ShoppingBag, Map as MapIcon, Flame, Cross } from "lucide-react";
+import { MapPin, ArrowRight, Sparkles, Music, Newspaper, ShoppingBag, Map as MapIcon, Flame, Cross, Globe, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useEthiopianCalendar } from "@/providers/EthiopianCalendarProvider";
 import { useSettings } from "@/providers/SettingsProvider";
@@ -242,51 +242,66 @@ export function Home() {
         </div>
       </section>
 
-      {/* Featured marketplace items */}
-      {(featuredItems?.length ?? 0) > 0 && (
-        <section className="mt-8 pl-4">
-          <div className="flex items-end justify-between pr-4 mb-3">
-            <SectionHeader
-              icon={<ShoppingBag className="h-4 w-4" />}
-              title={t("home.sections.exploreMarket")}
-            />
-            <Link href="/marketplace">
-              <span className="text-xs font-semibold text-primary flex items-center gap-1 cursor-pointer hover-elevate px-2 py-1 rounded-md">
-                {t("nav.viewAll")} <ArrowRight className="h-3 w-3" />
-              </span>
-            </Link>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-4 pr-4 -mr-4 scrollbar-hide">
-            {(Array.isArray(featuredItems) ? featuredItems : []).slice(0, 6).map((item) => (
-              <Link key={item.id} href={`/marketplace/${item.id}`}>
-                <Card
-                  className="w-[160px] shrink-0 rounded-2xl overflow-hidden cursor-pointer hover-elevate group border border-border/60 shadow-sm"
-                  data-testid={`card-featured-item-${item.id}`}
-                >
-                  <div className="aspect-square bg-muted/60 overflow-hidden">
-                    <img
-                      src={item.imageUrl || "https://placehold.co/300"}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="p-2.5">
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">
-                      {item.category}
-                    </div>
-                    <div className="text-sm font-medium text-foreground line-clamp-2 leading-tight mb-1">
-                      {item.title}
-                    </div>
-                    <div className="text-sm font-bold text-primary">
-                      {item.price} <span className="text-[10px] text-muted-foreground">{item.currency}</span>
+      {/* Community Discover */}
+      <section className="mt-10 px-4">
+        <div className="flex items-end justify-between mb-4">
+          <SectionHeader
+            icon={<Users className="h-4 w-4" />}
+            title={t("home.sections.community", { defaultValue: "Community Discover" })}
+            subtitle={t("home.sections.communitySubtitle", { defaultValue: "Explore routes shared by fellow pilgrims." })}
+          />
+        </div>
+
+        <div className="space-y-4">
+          {/* Public Itineraries */}
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+            {[
+              { id: "1", title: "Monasteries of Tana", author: "Abba Gabriel", stops: 7, image: "https://images.unsplash.com/photo-1544427920-c49ccfb85579?auto=format&fit=crop&q=80&w=300" },
+              { id: "2", title: "Northern Cross Route", author: "Sister Selam", stops: 12, image: "https://images.unsplash.com/photo-1590050752117-23a97b02bb17?auto=format&fit=crop&q=80&w=300" },
+            ].map(route => (
+              <Link key={route.id} href={`/itineraries/${route.id}`}>
+                <div className="w-[240px] shrink-0 bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm hover-elevate cursor-pointer group">
+                  <div className="aspect-[16/9] relative">
+                    <img src={route.image} alt={route.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-2 left-3 text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
+                      <Globe className="h-3 w-3" /> Public Route
                     </div>
                   </div>
-                </Card>
+                  <div className="p-3">
+                    <h4 className="font-serif font-bold text-base leading-tight mb-1">{route.title}</h4>
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground font-semibold">
+                      <span>By {route.author}</span>
+                      <span className="flex items-center gap-1"><MapPin className="h-2.5 w-2.5" /> {route.stops} stops</span>
+                    </div>
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
-        </section>
-      )}
+
+          {/* Recent Photos Grid (Mini) */}
+          <div className="bg-secondary/5 rounded-3xl p-4 border border-secondary/10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-secondary flex items-center gap-1.5">
+                <Sparkles className="h-3 w-3" /> Latest Contributions
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                "https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&q=80&w=150",
+                "https://images.unsplash.com/photo-1565451992095-26330084ba45?auto=format&fit=crop&q=80&w=150",
+                "https://images.unsplash.com/photo-1555400038-63f5ba517a47?auto=format&fit=crop&q=80&w=150",
+                "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&q=80&w=150",
+              ].map((img, i) => (
+                <div key={i} className="aspect-square rounded-lg overflow-hidden bg-muted">
+                  <img src={img} className="w-full h-full object-cover hover:scale-110 transition-transform cursor-pointer" alt="Contribution" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Latest news */}
       <section className="mt-8 px-4">

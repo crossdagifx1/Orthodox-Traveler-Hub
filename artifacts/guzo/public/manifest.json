@@ -1,0 +1,17 @@
+{
+  "name": "Guzo — Orthodox Tewahedo Journey",
+  "short_name": "Guzo",
+  "description": "Discover the ancient path of Ethiopian Orthodox Christianity.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#9c1d1f",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

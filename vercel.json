@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "comment": "Fixed vercel.json schema and ensured calendar API routing",
   "rewrites": [
     {
       "source": "/api/(.*)",

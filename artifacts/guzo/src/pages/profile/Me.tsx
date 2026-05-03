@@ -174,58 +174,51 @@ export function MeProfile() {
 
   return (
     <div className="pb-24">
-      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40">
-        <div className="flex items-center justify-between">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="rounded-full" data-testid="button-back-home">
-              <ArrowLeft className="h-4 w-4 mr-1" /> {t("nav.back")}
+      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40 flex justify-center relative">
+        <div className="flex items-center gap-2">
+          {!editing ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="rounded-full"
+              onClick={() => setEditing(true)}
+              data-testid="button-edit-profile"
+            >
+              <Pencil className="h-4 w-4 mr-1" />
+              {t("profile.edit", { defaultValue: "Edit" })}
             </Button>
-          </Link>
-          <div className="flex items-center gap-2">
-            {!editing ? (
+          ) : (
+            <>
               <Button
                 size="sm"
                 variant="ghost"
                 className="rounded-full"
-                onClick={() => setEditing(true)}
-                data-testid="button-edit-profile"
+                onClick={() => setEditing(false)}
+                data-testid="button-cancel-edit"
               >
-                <Pencil className="h-4 w-4 mr-1" />
-                {t("profile.edit", { defaultValue: "Edit" })}
+                <X className="h-4 w-4" />
               </Button>
-            ) : (
-              <>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="rounded-full"
-                  onClick={() => setEditing(false)}
-                  data-testid="button-cancel-edit"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  className="rounded-full"
-                  onClick={onSave}
-                  disabled={updateMutation.isPending}
-                  data-testid="button-save-profile"
-                >
-                  <Save className="h-4 w-4 mr-1" />
-                  {t("common.save", { defaultValue: "Save" })}
-                </Button>
-              </>
-            )}
-            <Button
-              size="sm"
-              variant="ghost"
-              className="rounded-full text-destructive"
-              onClick={logout}
-              data-testid="button-logout"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+              <Button
+                size="sm"
+                className="rounded-full"
+                onClick={onSave}
+                disabled={updateMutation.isPending}
+                data-testid="button-save-profile"
+              >
+                <Save className="h-4 w-4 mr-1" />
+                {t("common.save", { defaultValue: "Save" })}
+              </Button>
+            </>
+          )}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="rounded-full text-destructive"
+            onClick={logout}
+            data-testid="button-logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </header>
 

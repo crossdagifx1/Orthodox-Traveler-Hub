@@ -130,61 +130,60 @@ export function Map() {
     <div className="flex flex-col h-full bg-background pt-14">
       {/* Top filter bar — sits below the floating menu/lang controls */}
       <div className="px-3 pb-3 space-y-2 border-b border-border/40">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-serif font-bold text-foreground flex items-center gap-2">
-              <Globe2 className="h-5 w-5 text-primary" /> {t("map.title")}
-            </h1>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              {filtered.length} {t("map.churches", { defaultValue: "churches" })} ·{" "}
-              {countries.length} {t("map.countries", { defaultValue: "countries" })}
-            </p>
+        <div className="flex flex-col items-center text-center">
+          <h1 className="text-xl font-serif font-bold text-foreground">
+            {t("map.title")}
+          </h1>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+            {filtered.length} {t("map.churches", { defaultValue: "churches" })} ·{" "}
+            {countries.length} {t("map.countries", { defaultValue: "countries" })}
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-2 mt-2">
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={handleSyncGooglePlaces}
+              disabled={syncing}
+              data-testid="button-sync-google-places"
+              title="Sync Ethiopian Orthodox churches from Google Places"
+              className="h-8 px-3 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+            >
+              {syncing ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <CloudDownload className="h-3.5 w-3.5" />
+              )}
+              {syncing ? "Syncing…" : "Sync"}
+            </button>
+          )}
+          <div className="flex bg-card rounded-full p-0.5 border border-border/60">
+            <button
+              type="button"
+              onClick={() => setView("map")}
+              data-testid="button-view-map"
+              aria-label="Map view"
+              className={cn(
+                "h-8 w-8 rounded-full flex items-center justify-center text-xs",
+                view === "map" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+              )}
+            >
+              <MapIcon className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("list")}
+              data-testid="button-view-list"
+              aria-label="List view"
+              className={cn(
+                "h-8 w-8 rounded-full flex items-center justify-center text-xs",
+                view === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+              )}
+            >
+              <List className="h-4 w-4" />
+            </button>
           </div>
-          <div className="flex items-center gap-2">
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={handleSyncGooglePlaces}
-                disabled={syncing}
-                data-testid="button-sync-google-places"
-                title="Sync Ethiopian Orthodox churches from Google Places"
-                className="h-8 px-3 rounded-full text-[11px] font-semibold flex items-center gap-1.5 bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
-              >
-                {syncing ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <CloudDownload className="h-3.5 w-3.5" />
-                )}
-                {syncing ? "Syncing…" : "Sync from Google"}
-              </button>
-            )}
-            <div className="flex bg-card rounded-full p-0.5 border border-border/60">
-              <button
-                type="button"
-                onClick={() => setView("map")}
-                data-testid="button-view-map"
-                aria-label="Map view"
-                className={cn(
-                  "h-8 w-8 rounded-full flex items-center justify-center text-xs",
-                  view === "map" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
-                )}
-              >
-                <MapIcon className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setView("list")}
-                data-testid="button-view-list"
-                aria-label="List view"
-                className={cn(
-                  "h-8 w-8 rounded-full flex items-center justify-center text-xs",
-                  view === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
-                )}
-              >
-                <List className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+        </div>
         </div>
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -265,7 +264,7 @@ export function Map() {
                       <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Download maps for remote areas</p>
                     </div>
                     <button onClick={() => setIsDownloadModalOpen(false)} className="text-muted-foreground hover:text-foreground">
-                       <Loader2 className={cn("h-5 w-5", downloadingRegion && "animate-spin")} />
+                      <Loader2 className={cn("h-5 w-5", downloadingRegion && "animate-spin")} />
                     </button>
                   </div>
                   <div className="p-4 space-y-3">
@@ -279,8 +278,8 @@ export function Map() {
                           <div className="text-sm font-bold">{region.name}</div>
                           <div className="text-[10px] text-muted-foreground">{region.size}</div>
                         </div>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant={downloadingRegion === region.id ? "ghost" : "outline"}
                           className="rounded-full h-8 px-4 text-xs"
                           onClick={() => {
@@ -289,7 +288,7 @@ export function Map() {
                             const int = setInterval(() => {
                               p += 10;
                               setDownloadProgress(p);
-                              if(p >= 100) {
+                              if (p >= 100) {
                                 clearInterval(int);
                                 setDownloadingRegion(null);
                                 setDownloadProgress(0);

@@ -16,19 +16,12 @@ export function Challenges() {
 
   return (
     <div className="pb-24">
-      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40">
-        <div className="flex items-center justify-between">
-          <Link href="/learn">
-            <Button variant="ghost" size="sm" className="rounded-full" data-testid="button-back-learn">
-              <ArrowLeft className="h-4 w-4 mr-1" /> {t("nav.back")}
-            </Button>
-          </Link>
-          <div className="flex items-center gap-1.5 text-primary">
-            <Flame className="h-4 w-4" />
-            <span className="text-xs uppercase tracking-widest font-bold">
-              {t("learn.activeChallenges")}
-            </span>
-          </div>
+      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40 flex flex-col items-center text-center">
+        <div className="flex items-center gap-1.5 text-primary">
+          <Flame className="h-4 w-4" />
+          <span className="text-xs uppercase tracking-widest font-bold">
+            {t("learn.activeChallenges")}
+          </span>
         </div>
       </header>
 

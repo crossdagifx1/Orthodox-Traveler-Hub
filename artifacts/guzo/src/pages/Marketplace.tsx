@@ -20,27 +20,27 @@ import {
 import { useAuth } from "@/providers/AuthProvider";
 import { useWishlist } from "@/providers/WishlistProvider";
 import { cn } from "@/lib/utils";
-import { 
-  Search, 
-  Plus, 
-  Heart, 
-  Sparkles, 
-  CheckCircle, 
-  MapPin, 
-  Filter, 
-  LayoutGrid, 
-  List, 
+import {
+  Search,
+  Plus,
+  Heart,
+  Sparkles,
+  CheckCircle,
+  MapPin,
+  Filter,
+  LayoutGrid,
+  List,
   Zap,
   TrendingUp
 } from "lucide-react";
 
 const CATEGORIES = [
-  "all", 
-  "Ecclesiastical", 
-  "Clothing", 
-  "Icons", 
-  "Incense", 
-  "Books", 
+  "all",
+  "Ecclesiastical",
+  "Clothing",
+  "Icons",
+  "Incense",
+  "Books",
   "Jewelry",
   "Handicrafts"
 ] as const;
@@ -110,17 +110,17 @@ export function Marketplace() {
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/30" />
-        <div className="relative z-10 w-full flex justify-between items-end">
-          <div>
+        <div className="relative z-10 w-full">
+          <div className="flex flex-col items-center text-center">
             <h1 className="text-3xl font-serif font-bold text-primary leading-tight">
               {t("market.title")}
             </h1>
-            <p className="text-muted-foreground text-sm">{t("market.subtitle")}</p>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">{t("market.subtitle")}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="absolute top-0 right-0 flex items-center gap-2">
             {wishlist.count > 0 && (
               <span
-                className="text-[10px] font-bold bg-secondary/15 text-secondary px-2.5 py-1 rounded-full"
+                className="text-[10px] font-bold bg-secondary/15 text-secondary px-2.5 py-1 rounded-full backdrop-blur-sm"
                 data-testid="badge-wishlist-count"
               >
                 <Heart className="inline h-3 w-3 mr-1 fill-current" />
@@ -129,11 +129,11 @@ export function Marketplace() {
             )}
             <Button
               size="sm"
-              className="rounded-full shadow-md"
+              className="rounded-full shadow-md h-8 text-xs px-4"
               onClick={onSell}
               data-testid="button-sell-item"
             >
-              <Plus className="h-4 w-4 mr-1" /> {t("market.sellItem")}
+              <Plus className="h-3 w-3 mr-1" /> {t("market.sellItem")}
             </Button>
           </div>
         </div>
@@ -160,9 +160,9 @@ export function Marketplace() {
               className="pl-9 bg-card border-border/60 rounded-full shadow-sm text-xs"
             />
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="rounded-full bg-card border border-border/60 shrink-0"
             onClick={() => setLayout(l => l === "grid" ? "list" : "grid")}
           >
@@ -285,7 +285,7 @@ export function Marketplace() {
                   >
                     <Heart className={cn("h-4 w-4", saved && "fill-current")} />
                   </button>
-                  
+
                   <Link href={`/marketplace/${item.id}`}>
                     <Card
                       className={cn(
@@ -316,7 +316,7 @@ export function Marketplace() {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className={cn("p-3 flex flex-col justify-between", layout === "list" && "flex-1 min-w-0")}>
                         <div>
                           <div className="flex items-center justify-between mb-1">
@@ -334,7 +334,7 @@ export function Marketplace() {
                             {item.title}
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between mt-1">
                           <div className="text-base font-bold text-primary tabular-nums">
                             {item.price}{" "}

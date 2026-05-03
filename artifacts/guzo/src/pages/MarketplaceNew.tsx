@@ -78,10 +78,7 @@ export function MarketplaceNew() {
 
   return (
     <div className="p-4 pb-24 bg-background min-h-full">
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => window.history.back()}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+      <div className="flex flex-col items-center text-center mb-6">
         <h1 className="text-xl font-serif font-bold text-primary">List New Item</h1>
       </div>
 

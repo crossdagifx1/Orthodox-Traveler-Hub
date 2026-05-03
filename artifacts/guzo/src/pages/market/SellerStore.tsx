@@ -45,11 +45,6 @@ export function SellerStore() {
       {/* Hero Header */}
       <div className="relative h-40 bg-primary/10">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
-        <Link href="/marketplace">
-          <Button variant="ghost" size="icon" className="absolute top-4 left-4 rounded-full bg-background/50 backdrop-blur-md">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
       </div>
 
       {/* Seller Profile Card */}

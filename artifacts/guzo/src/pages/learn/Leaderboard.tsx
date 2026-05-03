@@ -30,17 +30,10 @@ export function Leaderboard() {
 
   return (
     <div className="pb-24">
-      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40">
-        <div className="flex items-center justify-between mb-3">
-          <Link href="/learn">
-            <Button variant="ghost" size="sm" className="rounded-full" data-testid="button-back-learn">
-              <ArrowLeft className="h-4 w-4 mr-1" /> {t("nav.back")}
-            </Button>
-          </Link>
-          <div className="flex items-center gap-1.5 text-primary">
-            <Trophy className="h-4 w-4" />
-            <span className="text-xs uppercase tracking-widest font-bold">{t("learn.leaderboard")}</span>
-          </div>
+      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40 flex flex-col items-center text-center">
+        <div className="flex items-center gap-1.5 text-primary mb-3">
+          <Trophy className="h-4 w-4" />
+          <span className="text-xs uppercase tracking-widest font-bold">{t("learn.leaderboard")}</span>
         </div>
         <div className="flex gap-1 overflow-x-auto scrollbar-hide -mx-1 px-1">
           {WINDOWS.map((w) => (

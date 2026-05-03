@@ -77,12 +77,7 @@ export function QuizDetail() {
         type="article"
       />
       <div className="px-4 pt-4">
-        <div className="flex items-center justify-between mb-3">
-          <Link href="/learn">
-            <Button variant="ghost" size="sm" className="rounded-full" data-testid="button-back-learn">
-              <ArrowLeft className="h-4 w-4 mr-1" /> {t("nav.back")}
-            </Button>
-          </Link>
+        <div className="flex items-center justify-end mb-3">
           {canEdit ? (
             <Link href={`/admin/qa/${quiz.id}`}>
               <Button variant="outline" size="sm" className="rounded-full" data-testid="button-edit-quiz">

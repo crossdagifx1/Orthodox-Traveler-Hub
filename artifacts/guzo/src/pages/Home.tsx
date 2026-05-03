@@ -41,10 +41,10 @@ export function Home() {
     calendar === "ethiopian"
       ? `${ethiopian.day} ${ethiopianMonthName} ${ethiopian.year}`
       : new Date().toLocaleDateString(isAmharic ? "am-ET" : "en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        });
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
   const fastLabel = t(`calendar.fastingPeriod.${fastingKey}`);
 
   return (
@@ -117,11 +117,10 @@ export function Home() {
           </p>
           <div className="flex items-center gap-2 text-xs">
             <span
-              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-semibold ${
-                fastingKey === "none"
+              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-semibold ${fastingKey === "none"
                   ? "bg-muted text-muted-foreground"
                   : "bg-secondary/15 text-secondary"
-              }`}
+                }`}
               data-testid="badge-fasting"
             >
               <Flame className="h-3 w-3" />

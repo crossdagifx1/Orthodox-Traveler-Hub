@@ -39,24 +39,19 @@ export function SellerDashboard() {
   return (
     <div className="min-h-full bg-background pb-24">
       {/* Header */}
-      <header className="px-6 pt-8 pb-6 bg-card border-b border-border/60">
-        <div className="flex items-center justify-between mb-4">
-          <Link href="/marketplace">
-            <Button variant="ghost" size="icon" className="rounded-full -ml-2">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <Button variant="outline" size="sm" className="rounded-full font-bold text-xs">
-            Shop Settings
-          </Button>
-        </div>
-        <h1 className="text-3xl font-serif font-bold text-foreground mb-1">
+      <header className="px-6 pt-6 pb-6 bg-card border-b border-border/60 flex flex-col items-center text-center">
+        <h1 className="text-2xl font-serif font-bold text-foreground mb-1">
           Seller Dashboard
         </h1>
-        <p className="text-muted-foreground text-sm flex items-center gap-1.5">
-          <TrendingUp className="h-4 w-4 text-green-500" /> 
-          Your sales are up 12% this week
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground flex items-center justify-center gap-1.5">
+          <TrendingUp className="h-3 w-3 text-green-500" /> 
+          Sales are up 12% this week
         </p>
+        <div className="absolute top-4 right-4">
+          <Button variant="outline" size="sm" className="rounded-full font-bold text-[10px] h-7 px-3 uppercase tracking-wider">
+            Settings
+          </Button>
+        </div>
       </header>
 
       {/* Stats Grid */}

@@ -27,9 +27,6 @@ export function ChurchDetail() {
       <div className="relative w-full aspect-[4/3] md:aspect-video">
         <img src={church.imageUrl || "https://placehold.co/800x600"} alt={church.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-background" />
-        <Button variant="ghost" size="icon" className="absolute top-4 left-4 text-white bg-black/20 hover:bg-black/40 rounded-full backdrop-blur-sm" onClick={() => window.history.back()}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
       </div>
 
       <div className="px-5 -mt-6 relative z-10">

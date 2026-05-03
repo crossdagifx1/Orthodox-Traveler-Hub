@@ -114,23 +114,6 @@ export function NewsDetail() {
 
 
 
-        <Button
-
-          variant="ghost"
-
-          size="icon"
-
-          className="absolute top-3 left-3 text-white bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md"
-
-          onClick={() => window.history.back()}
-
-          data-testid="button-back"
-
-        >
-
-          <ArrowLeft className="h-5 w-5" />
-
-        </Button>
 
         <div className="absolute top-3 right-3 flex gap-2">
 

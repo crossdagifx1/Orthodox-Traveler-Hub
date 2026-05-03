@@ -102,15 +102,6 @@ export function MarketplaceDetail() {
         />
 
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-foreground bg-background/80 hover:bg-background/95 rounded-full backdrop-blur-md shadow-sm border border-border/60"
-            onClick={() => window.history.back()}
-            data-testid="button-back"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
           <div className="flex gap-2">
             <Button
               variant="ghost"

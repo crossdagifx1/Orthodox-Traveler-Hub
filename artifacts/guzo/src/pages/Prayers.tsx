@@ -69,16 +69,11 @@ export function Prayers() {
           className="w-full h-full object-cover"
           alt="Prayers Background"
         />
-        <div className="absolute inset-0 z-20 p-6 flex flex-col justify-end">
-          <Link href="/">
-            <button className="absolute top-6 left-4 bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-white/30 transition-colors">
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-          </Link>
+        <div className="absolute inset-0 z-20 p-6 flex flex-col justify-end items-center text-center">
           <h1 className="text-3xl font-serif font-bold text-white mb-1">
             {t("prayers.title")}
           </h1>
-          <p className="text-white/80 text-sm italic">
+          <p className="text-white/80 text-sm italic uppercase tracking-wider">
             {t("prayers.subtitle")}
           </p>
         </div>

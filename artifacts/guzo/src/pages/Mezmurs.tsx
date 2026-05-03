@@ -75,12 +75,9 @@ export function Mezmurs() {
 
   return (
     <div className="pb-32 bg-background min-h-full">
-      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40">
-        <div className="flex items-center gap-2 mb-1">
-          <Disc className="h-5 w-5 text-primary" />
-          <h1 className="text-2xl font-serif font-bold text-primary">{t("mezmurs.title")}</h1>
-        </div>
-        <p className="text-xs text-muted-foreground mb-3">{t("mezmurs.subtitle")}</p>
+      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40 flex flex-col items-center text-center">
+        <h1 className="text-2xl font-serif font-bold text-primary mb-0.5">{t("mezmurs.title")}</h1>
+        <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-widest">{t("mezmurs.subtitle")}</p>
         <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input

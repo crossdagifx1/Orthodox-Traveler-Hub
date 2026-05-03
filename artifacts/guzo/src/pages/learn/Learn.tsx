@@ -70,27 +70,20 @@ export function Learn() {
   return (
     <div className="pb-24">
       {/* Hero header */}
-      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40">
-        <div className="flex items-center justify-between mb-1">
-          <div>
-            <h1 className="text-2xl font-serif font-bold text-primary flex items-center gap-2">
-              <GraduationCap className="h-6 w-6" />
-              {t("learn.title")}
-            </h1>
-            <p className="text-xs text-muted-foreground">{t("learn.subtitle")}</p>
-          </div>
-          <div className="flex gap-1">
-            <Link href="/learn/leaderboard">
-              <Button size="icon" variant="ghost" className="rounded-full" data-testid="link-learn-leaderboard">
-                <Trophy className="h-5 w-5 text-primary" />
-              </Button>
-            </Link>
-            <Link href="/learn/challenges">
-              <Button size="icon" variant="ghost" className="rounded-full" data-testid="link-learn-challenges">
-                <Flame className="h-5 w-5 text-primary" />
-              </Button>
-            </Link>
-          </div>
+      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40 flex flex-col items-center text-center">
+        <h1 className="text-2xl font-serif font-bold text-primary mb-0.5">{t("learn.title")}</h1>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{t("learn.subtitle")}</p>
+        <div className="absolute top-4 right-4 flex gap-1">
+          <Link href="/learn/leaderboard">
+            <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" data-testid="link-learn-leaderboard">
+              <Trophy className="h-4 w-4 text-primary" />
+            </Button>
+          </Link>
+          <Link href="/learn/challenges">
+            <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" data-testid="link-learn-challenges">
+              <Flame className="h-4 w-4 text-primary" />
+            </Button>
+          </Link>
         </div>
         <div className="relative mt-3">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

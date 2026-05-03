@@ -146,16 +146,7 @@ export function MezmurDetail() {
         type="music.song"
       />
       {/* Top bar */}
-      <div className="px-3 py-3 flex justify-between items-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full"
-          onClick={() => window.history.back()}
-          data-testid="button-back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+      <div className="px-3 py-3 flex justify-center items-center relative">
         <div className="flex flex-col items-center">
           <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
             {t("mezmurs.playing")}
@@ -166,7 +157,7 @@ export function MezmurDetail() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="absolute right-3 flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"

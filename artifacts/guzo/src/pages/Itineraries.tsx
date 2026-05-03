@@ -49,11 +49,11 @@ export function Itineraries() {
 
   return (
     <div className="pb-24">
-      <header className="px-6 pt-8 pb-4">
-        <h1 className="text-3xl font-serif font-bold text-foreground mb-2">
+      <header className="px-6 pt-6 pb-4 flex flex-col items-center text-center">
+        <h1 className="text-2xl font-serif font-bold text-foreground mb-1">
           {t("itineraries.title", { defaultValue: "My Pilgrimages" })}
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
           {t("itineraries.subtitle", { defaultValue: "Plan and organize your spiritual journeys." })}
         </p>
       </header>

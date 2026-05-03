@@ -46,11 +46,7 @@ export function ItineraryDetail() {
     <div className="pb-24 min-h-full bg-background">
       {/* Header */}
       <div className="px-4 pt-6 pb-4 flex items-center justify-between">
-        <Link href="/itineraries">
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
+        <div className="flex-1" />
         <div className="flex items-center gap-2">
            <Button variant="ghost" size="icon" className="rounded-full">
             <Share2 className="h-4 w-4" />

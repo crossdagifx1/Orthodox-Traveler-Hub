@@ -87,12 +87,9 @@ export function Destinations() {
 
     <div className="pb-20">
 
-      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40">
-        <div className="flex justify-between items-start mb-1">
-          <div>
-            <h1 className="text-2xl font-serif font-bold text-primary">{t("destinations.title")}</h1>
-            <p className="text-xs text-muted-foreground mb-3">{t("destinations.subtitle")}</p>
-          </div>
+      <header className="px-4 pt-4 pb-3 sticky top-0 bg-background/90 backdrop-blur-md z-30 border-b border-border/40 flex flex-col items-center text-center">
+        <h1 className="text-2xl font-serif font-bold text-primary mb-0.5">{t("destinations.title")}</h1>
+        <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-widest">{t("destinations.subtitle")}</p>
           {region !== "all" && !isOffline && (
             <Button 
               variant="outline" 

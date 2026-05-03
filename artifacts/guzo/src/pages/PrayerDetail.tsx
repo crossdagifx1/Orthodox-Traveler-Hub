@@ -120,11 +120,7 @@ export function PrayerDetail() {
     <div className="min-h-full pb-24 bg-[#FCF8F1] dark:bg-background">
       {/* Sticky Header */}
       <div className="sticky top-0 z-50 bg-[#FCF8F1]/80 dark:bg-background/80 backdrop-blur-lg border-b border-border/40 px-4 h-14 flex items-center justify-between">
-        <Link href="/prayers">
-          <button className="p-2 -ml-2 text-foreground/70 hover:text-foreground">
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-        </Link>
+        <div className="flex-1" />
         <div className="flex items-center gap-1">
           <button 
             onClick={() => setFontSize(f => f === "sm" ? "md" : f === "md" ? "lg" : "sm")}

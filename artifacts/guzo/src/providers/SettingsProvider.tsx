@@ -40,10 +40,18 @@ function readLs<T extends string>(key: string, fallback: T): T {
 
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
+  
+  // Check URL params for session override
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTheme = urlParams.get('theme');
+  
   const wantDark =
     theme === "dark" ||
-    (theme === "auto" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+    (theme === "auto" && (
+      urlTheme === 'dark' || 
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ));
+    
   root.classList.toggle("dark", wantDark);
 }
 
@@ -59,7 +67,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<LangCode>(
     () => (i18n.language?.split("-")[0] as LangCode) || "am",
   );
-  const [theme, setThemeState] = useState<Theme>(() => readLs<Theme>(LS_THEME, "light"));
+  const [theme, setThemeState] = useState<Theme>(() => readLs<Theme>(LS_THEME, "auto"));
   const [fontSize, setFontSizeState] = useState<FontSize>(
     () => readLs<FontSize>(LS_FONT, "md"),
   );

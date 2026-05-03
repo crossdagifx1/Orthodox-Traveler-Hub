@@ -105,7 +105,6 @@ export function Destinations() {
               )}
             </Button>
           )}
-        </div>
 
         <div className="relative">
 

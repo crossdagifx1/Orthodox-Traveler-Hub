@@ -1,5 +1,5 @@
 import { usePlayer } from "./PlayerContext";
-import { Play, Pause, X } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function MiniPlayer() {
@@ -13,16 +13,16 @@ export function MiniPlayer() {
     <div className="bg-primary/5 backdrop-blur-md border-t border-border flex flex-col sticky bottom-0 z-40 animate-in slide-in-from-bottom-2">
       {/* Progress Bar */}
       <div className="h-0.5 w-full bg-primary/10">
-        <div 
-          className="h-full bg-primary transition-all duration-300 ease-linear" 
+        <div
+          className="h-full bg-primary transition-all duration-300 ease-linear"
           style={{ width: `${percent}%` }}
         />
       </div>
 
       <div className="p-2 flex items-center justify-between">
         <div className="flex items-center gap-3 overflow-hidden">
-          <img 
-            src={currentTrack.coverUrl || "https://placehold.co/100x100"} 
+          <img
+            src={currentTrack.coverUrl || "https://placehold.co/100x100"}
             alt={currentTrack.title}
             className="w-10 h-10 rounded-md object-cover flex-shrink-0 bg-muted"
           />
@@ -32,7 +32,7 @@ export function MiniPlayer() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={isPlaying ? pauseTrack : resumeTrack}
             className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
           >

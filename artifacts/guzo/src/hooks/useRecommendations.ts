@@ -28,7 +28,7 @@ export function useRecommendations(options: RecommendationOptions = {}) {
     queryFn: async (): Promise<Recommendation[]> => {
       // In production, this would call your AI/ML recommendation API
       // For now, returning mock recommendations
-      
+
       const response = await fetch('/api/recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

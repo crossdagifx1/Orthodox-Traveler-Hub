@@ -20,14 +20,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     audioRef.current = new Audio();
-    
+
     const audio = audioRef.current;
-    
+
     const updateProgress = () => setProgress(audio.currentTime);
     const updateDuration = () => setDuration(audio.duration);
     const onEnded = () => setIsPlaying(false);
@@ -46,7 +46,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!audioRef.current || !currentTrack) return;
-    
+
     const audio = audioRef.current;
     if (audio.src !== currentTrack.audioUrl) {
       audio.src = currentTrack.audioUrl;
@@ -78,7 +78,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     } else {
       audioRef.current.pause();
     }
-    
+
     if ("mediaSession" in navigator) {
       navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
     }
@@ -100,14 +100,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   return (
     <PlayerContext.Provider
-      value={{ 
-        currentTrack, 
-        isPlaying, 
-        progress, 
-        duration, 
-        playTrack, 
-        pauseTrack, 
-        resumeTrack, 
+      value={{
+        currentTrack,
+        isPlaying,
+        progress,
+        duration,
+        playTrack,
+        pauseTrack,
+        resumeTrack,
         togglePlayPause,
         seek
       }}

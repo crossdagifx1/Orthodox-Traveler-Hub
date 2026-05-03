@@ -51,7 +51,6 @@ export function Marketplace() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
   const [layout, setLayout] = useState<"grid" | "list">("grid");
-  const [location, setLocation] = useState<string>("");
   const [sort, setSort] = useState<SortKey>("featured");
   const { isAuthed, openLogin } = useAuth();
   const wishlist = useWishlist();
